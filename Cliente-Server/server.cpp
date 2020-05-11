@@ -18,16 +18,19 @@
 typedef struct {
 Socket *server_socket;
 int client_id;
-
+int thread_id; 
 }thread_data_t;
 
 
 void* run(void* data) { 
+	
 	std::string answer_to_client = "mensaje recibido"; 
 	char* msg_from_client = (char*)calloc(512, sizeof(char));  
 	char* final_answer = (char*)calloc(512, sizeof(char));  
 
 	thread_data_t* thread_data = (thread_data_t*)data;
+
+	printf("soy el thread : %d y estoy atendiendo al cliente : %d", thread_data->thread_id, thread_data->client_id); 
 
 
 	if(-1 == thread_data->server_socket->Read(msg_from_client,512,thread_data->client_id)) {
@@ -64,6 +67,8 @@ perror("there was an error");
 }
 
 
+int contador_threads = 0; 
+
 while(1) {
 
 	struct sockaddr_in socket_client;
@@ -77,7 +82,7 @@ while(1) {
 		thread_data_t* thread_data = (thread_data_t*)calloc(1,sizeof(thread_data_t)); 
 		thread_data->server_socket = &server_socket;
 		thread_data->client_id = client_id;  
-
+		thread_data->thread_id = ++contador_threads; 
 		pthread_t* thread = (pthread_t*)malloc(1*sizeof(pthread_t)); 
 
 		pthread_create(thread, NULL, run, thread_data); 
