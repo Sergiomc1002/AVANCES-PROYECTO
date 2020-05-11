@@ -25,13 +25,11 @@ int main()
 {
     char* file_name = get_file_name(request2);
     
-
-
     if (file_name != NULL)
         printf("%s\n", file_name);
 
     if (file_name != NULL)
         free(file_name);
-
+ 
     return 0;
 }

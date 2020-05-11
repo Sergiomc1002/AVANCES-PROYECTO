@@ -85,6 +85,8 @@ char* get_file_name(char* header)
         file_name[counter - 5] = header[counter];
         counter++;
     }
+    
+	free(command); 
 
     return file_name;
 }
