@@ -14,10 +14,15 @@
 		if (bytes_read != 0) {	 //si no es la primera iteración, ya leí el header y los datos que venian con el. 
 			memset(response, 0, 512 * sizeof(char));	//se limpia el buffer. 
 			read_status = s.Read(response, 512);
-			int len_current_read = strlen(response);	//siempre va a leer 512 bytes, a menos que sea la ultima leida, ahí solo sería lo que queda pendiente. 
-			strcpy(data_from_server+index_data_from_server, response); 
-			index_data_from_server+= len_current_read; 
-			bytes_read+= len_current_read; 
+			//int len_current_read = strlen(response);	//siempre va a leer 512 bytes, a menos que sea la ultima leida, ahí solo sería lo que queda pendiente. 
+			if (read_status != -1) {			//read_status ya me dice los bytes leidos, lo de arriba no es necesario. 
+				strcpy(data_from_server+index_data_from_server, response); 
+				index_data_from_server+= read_status; 
+				bytes_read+= read_status;
+			}
+			else {
+				b_exit = true;
+			}
 		}
 		else {			//es la primera iteración, tengo que leer el header. 
 			read_status = s.Read(response, 512);
