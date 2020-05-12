@@ -24,7 +24,6 @@
 			if (read_status != -1) {
 				content_length = get_file_size(response);	//se averigua ya el verdadero content_length, para saber si hay que seguir leyendo o no. 
 				data_from_server = (char*)calloc(content_length,sizeof(char)); //se reserva memoria suficiente para guardar todo lo que manda el server. 
-				bytes_read+= read_status; 
 				int counter_data = 0; 
 				while(counter_data < content_length) {	//buscar en que posicion del char* comienza la página html. 
 					if (response[counter_data] == '\\' && response[counter_data+1] == 'n' && response[counter_data+2] == '\\' && response[counter_data+3] == 'n') {
@@ -36,6 +35,7 @@
 				
 				strcpy(data_from_server, response+start_data);	//copie todo lo que viene en el primer read, pero desde responde+start_data, sin el header. 
 				index_data_from_server = strlen(response) - start_data; //necesito este index, para el siguiente copiado, y no caerle a los datos ya leidos. 
+				bytes_read+= strlen(response) - start_data;	//la cantidad de bytes leidos que corresponde al html, sin el header. 
 			}
 			else {
 				b_exit = true; 
