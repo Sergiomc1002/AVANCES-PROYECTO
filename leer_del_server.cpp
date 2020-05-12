@@ -28,7 +28,7 @@
 				while(counter_data < content_length) {	//buscar en que posicion del char* comienza la página html. 
 					if (response[counter_data] == '\\' && response[counter_data+1] == 'n' && response[counter_data+2] == '\\' && response[counter_data+3] == 'n') {
 						//si hay 2. \n seguidos. es decir, a partir de ahí comienza el archivo html. 
-						start_data == counter_data+4; //los datos comienzan despues del ultimo \n. 
+						start_data = counter_data+4; //los datos comienzan despues del ultimo \n. 
 						counter_data = content_length;//nos salimos del while. 
 					}
 					++counter_data; 
