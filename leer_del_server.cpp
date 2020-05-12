@@ -10,8 +10,8 @@
 	char* data_from_server; 		//se va a inicializar posteriormente una vez se sepa cuantos bytes me esta mandando el server. 
 	int index_data_from_server = 0; //para saber por donde vamos escribiendo. 
 	
-	while(bytes_read < content_length && !b_exit) {
-		if (bytes_read != 0) {	//de la segunda iteración a la ultima, content_length ya tiene el valor real, por lo que solo entra si queda pendiente por leer. 
+	while(bytes_read < content_length && !b_exit) {//de la segunda iteración a la ultima, content_length ya tiene el valor real, por lo que solo entra si queda pendiente por leer.
+		if (bytes_read != 0) {	 //si no es la primera iteración, ya leí el header y los datos que venian con el. 
 			memset(response, 0, 512 * sizeof(char));	//se limpia el buffer. 
 			read_status = s.Read(response, 512);
 			int len_current_read = strlen(response);	//siempre va a leer 512 bytes, a menos que sea la ultima leida, ahí solo sería lo que queda pendiente. 
