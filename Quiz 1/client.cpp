@@ -12,6 +12,42 @@
 int main( int argc, char * argv[] ) {
 
    Socket s( 's', false);
+   
+   /*
+   char* request = argv[1]; 
+   char* ip_address = (char*)calloc(20, sizeof(char)); 
+   
+	bool found_end = false; 
+	int counter = 0; 
+   
+   char* filename = (char*)calloc(20, sizeof(char)); 
+   
+   int len_request = strlen(request); 
+   
+   
+   while (!found_end) {
+	   if (*(request+counter) != '/') {
+			*(ip_address+counter) = *(request+counter); 
+			++counter;
+		}
+		else {
+			found_end = true; 
+			++counter; 
+			int counter_filename = 0; 
+			while(counter < len_request) {
+				*(filename+counter_filename) = *(request+counter);
+				++counter;
+				++counter_filename; 
+			}
+		} 
+	}
+   
+   printf("imprimiendo direccion ip : %s\n", ip_address); 
+   printf("imprimiendo archivo solicitado : %s\n", filename); 
+   
+   */
+   
+   
 	//char*a = (char*)calloc(512,sizeof(char));
    char* filename = argv[1];
    char* request = make_request_header(filename);
@@ -56,5 +92,7 @@ int main( int argc, char * argv[] ) {
    }
    
    newFile.close();
+   
+   
 }
 
