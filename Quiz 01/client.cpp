@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fstream>
-
+#include <iostream>
 #include "http_parser.h"
 #include "socket.h"
 
@@ -13,7 +13,7 @@ int main( int argc, char * argv[] ) {
 
    Socket s( 's', false);
    
-   /*
+   
    char* request = argv[1]; 
    char* ip_address = (char*)calloc(20, sizeof(char)); 
    
@@ -42,21 +42,12 @@ int main( int argc, char * argv[] ) {
 		} 
 	}
    
-   printf("imprimiendo direccion ip : %s\n", ip_address); 
-   printf("imprimiendo archivo solicitado : %s\n", filename); 
-   
-   */
-   
    
 	//char*a = (char*)calloc(512,sizeof(char));
-   char* filename = argv[1];
-   char* request = make_request_header(filename);
+   request = make_request_header(filename);
    printf("REQ: %s\n", request);
-
-   //int status_connect = s.Connect("127.0.0.1", SERVER_PORT );
-   int status_connect = s.Connect("163.178.104.187", SERVER_PORT );
-   
-
+   int status_connect = s.Connect(ip_address, SERVER_PORT );
+   //163.178.104.187
    int write_status = s.Write(request);
 
    char* response = (char*)calloc(512, sizeof(char));
@@ -69,27 +60,35 @@ int main( int argc, char * argv[] ) {
    printf("Cl: %d\n", content_length);
 
    char* buff = response;
-   int counter = 0;
+   counter = 0;
    bool b_exit = false;
 
-   std::fstream newFile;
-   newFile.open("index2.html", std::fstream::in | std::fstream::out | std::fstream::app);
+   std::ofstream newFile("resultados.html",std::ios::in | std::ios::out | std::ios::trunc );
+   //newFile.open("resultados.html", std::ios::in | std::ios::out );
+   newFile.write(response, strlen(response));
 
-   while(counter < content_length && !b_exit)
-   {
-      // Leer
-      memset(buff, 0, 512 * sizeof(char));
-      int bytes_read = s.Read(buff, 512);
-      if (bytes_read == -1) b_exit = true;
-      else {
-         counter += bytes_read;
+  
+   
+   
+   //newFile >> response;
+	
+	
+   // while(counter < content_length && !b_exit)
+   // {
+      //Leer
+      // memset(buff, 0, 512 * sizeof(char));
+      // int bytes_read = s.Read(buff, 512);
+      // if (bytes_read == -1){
+		  // b_exit = true;
+	  // }
+      // else {
+         // counter += bytes_read;
       
-         //Guardar archivo
-         newFile << buff;
-         //newFile << counter << '\n';
-      }
-
-   }
+     //    Guardar archivo
+         // newFile >> buff;
+         // printf( "counter: %d\n",counter );
+      // }
+   //}
    
    newFile.close();
    

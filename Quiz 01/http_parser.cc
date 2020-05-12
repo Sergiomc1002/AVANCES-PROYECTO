@@ -105,11 +105,11 @@ char* make_request_header(char* filename)
     int fn_size = strlen(filename);
     strcpy(request_header + get_len, filename);
     // Add Protocol
-    strcpy(request_header + get_len + fn_size, (char*)" HTTP/1.1\n\rhost: www.google.com\n\r"); 
+    strcpy(request_header + get_len + fn_size, (char*)" HTTP/1.1\r\nhost: www.google.com\r\n\r\n"); 
 
     return request_header;
 }
-
+//GET / HTTP/1.1\r\nhost: SERVIDOR LOCAL\r\n\r\n
 //HTTP/1.1 200 OK
 //Content-Length: 1200
 //(blank line)
