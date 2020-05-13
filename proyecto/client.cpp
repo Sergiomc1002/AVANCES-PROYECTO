@@ -106,6 +106,7 @@ int main( int argc, char * argv[] ) {
 					++counter_data; 
 				}
 			int diference = read_status - start_data; 	 
+			bytes_read+= diference; 
 			write(id_file, response+start_data, diference); 		
 			
 		}

@@ -95,7 +95,7 @@ char* get_file_name(char* header)
 */
 char* make_request_header(char* filename) 
 {
-    printf("filename: %s\n", filename);
+    //printf("filename: %s\n", filename);
     char* request_header = (char*)calloc(1, REQUEST_HEADER_SIZE);
 
     // Add Request Function
