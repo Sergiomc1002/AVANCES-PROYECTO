@@ -181,7 +181,7 @@ char* get_extension_file(char* response_header) {
 				}
 				++counter; 
 				int counter_extesion = 0; 
-				while(index_data + line_len + counter < header_size && response_header[index_data+line_len+counter] != '\r') {
+				while(index_data + line_len + counter < header_size && response_header[index_data+line_len+counter] != '\r' && response_header[index_data+line_len+counter] != ';') {
 					*(file_type+counter_extesion) = *(response_header+index_data+line_len+counter);
 					++counter; 
 					++counter_extesion; 

@@ -72,10 +72,13 @@ int main( int argc, char * argv[] ) {
 	//id_file = open(filename, O_RDONLY | O_CREAT);  
 
 	
-	char* file = (char*)"image.png"; 
+	char* file = (char*)calloc(10, sizeof(char)); 
+	char* name = (char*)"file."; 
+	
+	strcpy(file, name);
 
-	id_file = creat(file, S_IRUSR | S_IWUSR),
 
+	
    request = make_request_header(filename);
 	
    int status_connect = s.Connect(ip_address, server_port );
@@ -97,12 +100,13 @@ int main( int argc, char * argv[] ) {
 			memset(response, 0, 1024 * sizeof(char)); 	
 		}
 		else {
-			printf("primera iteracion"); 
+				char* extension = get_extension_file(response); 
+				strcat(file, extension); 
+				id_file = creat(file, S_IRUSR | S_IWUSR);
 				int counter_data = 0; 
 				while(counter_data < read_status) {	 
 					if (response[counter_data] == '\r' && response[counter_data+1] == '\n' && response[counter_data+2] == '\r' && response[counter_data+3] == '\n') {
-						printf("encontre el comienzo de los datos");  
-						start_data = counter_data+3;  
+						start_data = counter_data+4;  
 						counter_data = read_status;
 					}
 					++counter_data; 
@@ -116,6 +120,7 @@ int main( int argc, char * argv[] ) {
 	
 
    close(id_file); 
+   
    
    //free(ip_address); 
    //free(filename); 
