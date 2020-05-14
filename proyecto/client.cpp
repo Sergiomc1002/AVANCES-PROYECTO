@@ -82,7 +82,7 @@ int main( int argc, char * argv[] ) {
 
    int write_status = s.Write(request);
 
-   char* response = (char*)calloc(512, sizeof(char));
+   char* response = (char*)calloc(1024, sizeof(char));
    
    int bytes_read = 0; 
 	int read_status = 0; 
@@ -90,16 +90,18 @@ int main( int argc, char * argv[] ) {
 	int current_len = 0; 
  
  
-	while((read_status = s.Read(response, 512)) > 0) {
+	while((read_status = s.Read(response, 1024)) > 0) {
 		if (bytes_read != 0) {
 			bytes_read+= read_status; 	
 			write(id_file, response, read_status);
-			memset(response, 0, 512 * sizeof(char)); 	
+			memset(response, 0, 1024 * sizeof(char)); 	
 		}
 		else {
+			printf("primera iteracion"); 
 				int counter_data = 0; 
 				while(counter_data < read_status) {	 
-					if (response[counter_data] == '\r' && response[counter_data+1] == '\n' && response[counter_data+2] == '\r' && response[counter_data+3] == '\n') { 
+					if (response[counter_data] == '\r' && response[counter_data+1] == '\n' && response[counter_data+2] == '\r' && response[counter_data+3] == '\n') {
+						printf("encontre el comienzo de los datos");  
 						start_data = counter_data+3;  
 						counter_data = read_status;
 					}
@@ -110,7 +112,6 @@ int main( int argc, char * argv[] ) {
 			write(id_file, response+start_data, diference); 		
 			
 		}
-
 	}
 	
 
