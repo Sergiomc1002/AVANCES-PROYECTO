@@ -72,7 +72,7 @@ int main( int argc, char * argv[] ) {
 	//id_file = open(filename, O_RDONLY | O_CREAT);  
 
 	
-	char* file = (char*)"file.html"; 
+	char* file = (char*)"image.png"; 
 
 	id_file = creat(file, S_IRUSR | S_IWUSR),
 

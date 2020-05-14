@@ -161,3 +161,36 @@ int get_file_size(char* response_header)
 
     return size;
 }
+
+
+char* get_extension_file(char* response_header) {
+	char* line = (char*)"Content-Type: "; 
+	int line_len = strlen(line);
+	int header_size = strlen(response_header);  	
+	bool found_file_type = false; 
+	
+	char* file_type = (char*)calloc(10, sizeof(char));
+
+	int index_data = 0;  
+	while(index_data < header_size && !found_file_type) {
+		if (*(response_header+index_data) == 'C') {
+			if (strncmp(&response_header[index_data], line, line_len) == 0) {
+				int counter = 0; 
+				while(index_data + line_len+counter < header_size && response_header[index_data+line_len+counter] != '/') {
+					++counter; 
+				}
+				++counter; 
+				int counter_extesion = 0; 
+				while(index_data + line_len + counter < header_size && response_header[index_data+line_len+counter] != '\r') {
+					*(file_type+counter_extesion) = *(response_header+index_data+line_len+counter);
+					++counter; 
+					++counter_extesion; 
+				}
+				found_file_type = true; 
+			}		
+		}
+		++index_data; 
+	}
+	return file_type; 		
+}
+
