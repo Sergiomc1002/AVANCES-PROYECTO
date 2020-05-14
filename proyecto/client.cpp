@@ -100,21 +100,13 @@ int main( int argc, char * argv[] ) {
 			memset(response, 0, 1024 * sizeof(char)); 	
 		}
 		else {
-				char* extension = get_extension_file(response); 
+				char* extension = get_file_extension(response); 
 				strcat(file, extension); 
-				id_file = creat(file, S_IRUSR | S_IWUSR);
-				int counter_data = 0; 
-				while(counter_data < read_status) {	 
-					if (response[counter_data] == '\r' && response[counter_data+1] == '\n' && response[counter_data+2] == '\r' && response[counter_data+3] == '\n') {
-						start_data = counter_data+4;  
-						counter_data = read_status;
-					}
-					++counter_data; 
-				}
-			int diference = read_status - start_data; 	 
-			bytes_read+= diference; 
-			write(id_file, response+start_data, diference); 		
-			
+				id_file = creat(file, S_IRUSR | S_IWUSR);				
+				start_data = get_index_start_data(response, read_status); 
+				int diference = read_status - start_data; 	 
+				bytes_read+= diference; 
+				write(id_file, response+start_data, diference); 					
 		}
 	}
 	

@@ -163,7 +163,7 @@ int get_file_size(char* response_header)
 }
 
 
-char* get_extension_file(char* response_header) {
+char* get_file_extension(char* response_header) {
 	char* line = (char*)"Content-Type: "; 
 	int line_len = strlen(line);
 	int header_size = strlen(response_header);  	
@@ -194,3 +194,17 @@ char* get_extension_file(char* response_header) {
 	return file_type; 		
 }
 
+int get_index_start_data(char* response, int read_status) {
+		
+	int start_data = 0; 	
+	int counter_data = 0; 
+	while(counter_data < read_status) {	 
+		if (response[counter_data] == '\r' && response[counter_data+1] == '\n' && response[counter_data+2] == '\r' && response[counter_data+3] == '\n') {
+			start_data = counter_data+4;  
+			counter_data = read_status;
+		}
+		++counter_data; 
+	}
+	
+return start_data; 	
+}

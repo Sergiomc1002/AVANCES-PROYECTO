@@ -10,4 +10,6 @@ extern char* make_request_header(char* filename);
 
 extern char* make_response_header(char* filename);
 
-extern char* get_extension_file(char* response_header);
+extern char* get_file_extension(char* response_header);
+
+extern int get_index_start_data(char* response, int read_status); 
