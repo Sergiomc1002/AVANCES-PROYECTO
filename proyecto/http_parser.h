@@ -1,6 +1,19 @@
 #define FILE_NAME_SIZE 120
 #define REQUEST_HEADER_SIZE 120
 #define RESPONSE_HEADER_SIZE 120
+#define SERVER_PORT 80
+
+typedef struct {
+	char* ip_address; 
+	char* filename; 
+	char* port; 
+	int server_port; 		//despues hay que convertirlo a entero. 
+	
+}data_arguments_t; 
+
+extern void set_initial_values(data_arguments_t *data_arguments, char* request); 
+
+extern void free_initial_values(data_arguments_t* data_arguments); 
 
 extern char* get_file_name(char* header);
 

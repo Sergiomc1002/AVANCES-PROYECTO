@@ -208,3 +208,66 @@ int get_index_start_data(char* response, int read_status) {
 	
 return start_data; 	
 }
+
+
+void set_initial_values(data_arguments_t *data_arguments, char* request) {
+	
+	data_arguments->ip_address = (char*)calloc(20, sizeof(char)); 
+	data_arguments->filename = (char*)calloc(20, sizeof(char)); 
+	data_arguments->port = (char*)calloc(20, sizeof(char)); 
+   
+	bool found_end = false; 
+	int counter = 0; 
+   
+   int len_request = strlen(request); 
+
+    int server_port = 0; 
+   
+   
+   while (!found_end && counter < len_request) {
+	   if (*(request+counter) != '/' && *(request+counter) != ':') {
+			*(data_arguments->ip_address+counter) = *(request+counter); 
+			++counter;
+		}
+		else {
+			
+			if (*(request+counter) == ':') {
+				int counter_port = 0; 
+				++counter; 
+				while(*(request+counter) != '/') {
+					*(data_arguments->port+counter_port) = *(request+counter);
+					++counter; 
+					++counter_port;  
+					server_port = 1; 
+				}
+			}
+			
+			found_end = true; 
+			++counter; 
+			int counter_filename = 0; 
+			while(counter < len_request) {
+				*(data_arguments->filename+counter_filename) = *(request+counter);
+				++counter;
+				++counter_filename; 
+			}
+		} 
+	}
+	
+		
+	if (server_port) {
+		data_arguments->server_port = atoi(data_arguments->port); 
+	}
+	else {
+		data_arguments->server_port = SERVER_PORT;
+	}
+			
+}
+
+
+void free_initial_values(data_arguments_t* data_arguments) {
+	
+	free(data_arguments->ip_address); 
+	free(data_arguments->filename);
+	free(data_arguments->port);  
+	
+}

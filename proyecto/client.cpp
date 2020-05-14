@@ -10,89 +10,39 @@
 //#define SERVER_PORT 7002
 #define SERVER_PORT 80
 
+
+
 int main( int argc, char * argv[] ) {
 
-   Socket s( 's', false);
-   char* request = argv[1]; 
-   char* ip_address = (char*)calloc(20, sizeof(char)); 
-   
-	bool found_end = false; 
-	int counter = 0; 
-   
-   char* filename = (char*)calloc(20, sizeof(char)); 
-   
-   int len_request = strlen(request); 
-   char* port = (char*)calloc(20, sizeof(char)); 
-    int server_port = 0; 
-   
-   
-   while (!found_end && counter < strlen(request)) {
-	   if (*(request+counter) != '/' && *(request+counter) != ':') {
-			*(ip_address+counter) = *(request+counter); 
-			++counter;
-		}
-		else {
-			
-			if (*(request+counter) == ':') {
-				int counter_port = 0; 
-				++counter; 
-				while(*(request+counter) != '/') {
-					*(port+counter_port) = *(request+counter);
-					++counter; 
-					++counter_port;  
-					server_port = 1; 
-				}
-			}
-			
-			found_end = true; 
-			++counter; 
-			int counter_filename = 0; 
-			while(counter < len_request) {
-				*(filename+counter_filename) = *(request+counter);
-				++counter;
-				++counter_filename; 
-			}
-		} 
-	}
-	
-	
-	if (server_port) {
-		server_port = atoi(port); 
-	}
-	else {
-		server_port = SERVER_PORT;
-	}
-   
-   
-    int id_file; 
-    
-   
-   	//id_file = open(filename, O_RDWR  | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IXUSR);
+	Socket s( 's', false);
+	char* request = argv[1]; 
 
-	//id_file = open(filename, O_RDONLY | O_CREAT);  
+	data_arguments_t *start_values = (data_arguments_t*)calloc(1, sizeof(data_arguments_t)); 
 
-	
+	set_initial_values(start_values, request); 
+
 	char* file = (char*)calloc(10, sizeof(char)); 
+
 	char* name = (char*)"file."; 
-	
+
+	int id_file;     	
+
 	strcpy(file, name);
 
+	request = make_request_header(start_values->filename);
 
-	
-   request = make_request_header(filename);
-	
-   int status_connect = s.Connect(ip_address, server_port );
+	int status_connect = s.Connect(start_values->ip_address, start_values->server_port );
 
-   int write_status = s.Write(request);
+	int write_status = s.Write(request);
 
-   char* response = (char*)calloc(1024, sizeof(char));
-   
-   int bytes_read = 0; 
+	char* response = (char*)calloc(1024, sizeof(char));
+
+	int bytes_read = 0; 
 	int read_status = 0; 
 	int start_data = 0; 
 	int current_len = 0; 
- 
- 
+
+
 	while((read_status = s.Read(response, 1024)) > 0) {
 		if (bytes_read != 0) {
 			bytes_read+= read_status; 	
@@ -109,14 +59,11 @@ int main( int argc, char * argv[] ) {
 				write(id_file, response+start_data, diference); 					
 		}
 	}
-	
 
-   close(id_file); 
-   
-   
-   //free(ip_address); 
-   //free(filename); 
-   //free(port); 
+
+	close(id_file); 
+
+	//free_initial_values(start_values); 
    
 }
 
