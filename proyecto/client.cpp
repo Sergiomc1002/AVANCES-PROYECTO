@@ -66,15 +66,12 @@ int main( int argc, char * argv[] ) {
    
     int id_file; 
     
-    
-    
-	char* file = (char*)calloc(20, sizeof(char)); 
    
-	strcpy(file, filename); 
-   
-   	id_file = open(file, O_RDWR | O_CREAT | S_IRUSR | S_IWUSR);
+   	//id_file = open(filename, O_RDWR  | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IXUSR);
 
+	//id_file = open(filename, O_RDONLY | O_CREAT);  
 
+	id_file = creat(filename, S_IRUSR | S_IWUSR),
 
    request = make_request_header(filename);
 
