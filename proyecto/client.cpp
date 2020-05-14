@@ -26,7 +26,7 @@ int main( int argc, char * argv[] ) {
     int server_port = 0; 
    
    
-   while (!found_end) {
+   while (!found_end && counter < strlen(request)) {
 	   if (*(request+counter) != '/' && *(request+counter) != ':') {
 			*(ip_address+counter) = *(request+counter); 
 			++counter;
@@ -71,10 +71,13 @@ int main( int argc, char * argv[] ) {
 
 	//id_file = open(filename, O_RDONLY | O_CREAT);  
 
-	id_file = creat(filename, S_IRUSR | S_IWUSR),
+	
+	char* file = (char*)"file.html"; 
+
+	id_file = creat(file, S_IRUSR | S_IWUSR),
 
    request = make_request_header(filename);
-
+	
    int status_connect = s.Connect(ip_address, server_port );
 
    int write_status = s.Write(request);
@@ -109,9 +112,13 @@ int main( int argc, char * argv[] ) {
 		}
 
 	}
-
+	
 
    close(id_file); 
+   
+   //free(ip_address); 
+   //free(filename); 
+   //free(port); 
    
 }
 
