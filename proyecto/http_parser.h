@@ -26,3 +26,5 @@ extern char* make_response_header(char* filename);
 extern char* get_file_extension(char* response_header);
 
 extern int get_index_start_data(char* response, int read_status); 
+
+extern int get_http_status(char* response_header, int read_status); 

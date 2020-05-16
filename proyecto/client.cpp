@@ -14,6 +14,12 @@
 
 int main( int argc, char * argv[] ) {
 
+//examples how to run the program
+//./client 163.178.104.187:80/RioCeleste-VolcanTenorio.jpg
+//./client 163.178.104.81	-> ecci
+//./cient 163.178.104.187/index.html
+
+
 	Socket s( 's', false);
 	char* request = argv[1]; 
 
@@ -41,23 +47,39 @@ int main( int argc, char * argv[] ) {
 	int read_status = 0; 
 	int start_data = 0; 
 	int current_len = 0; 
+	bool f_exit = false; 
+	int status_http_protocol = 0; 
 
 
-	while((read_status = s.Read(response, 1024)) > 0) {
+	while((read_status = s.Read(response, 1024)) > 0 && !f_exit) {
 		if (bytes_read != 0) {
 			bytes_read+= read_status; 	
 			write(id_file, response, read_status);
 			memset(response, 0, 1024 * sizeof(char)); 	
 		}
-		else {
+		else {		//primera iteración se lee el header. 
+			if (status_http_protocol = get_http_status(response, read_status)) {		//podemos manejar unos codigos internos, 1, todo bien, 2 otra cosa etc. 
 				char* extension = get_file_extension(response); 
 				strcat(file, extension); 
 				id_file = creat(file, S_IRUSR | S_IWUSR);				
 				start_data = get_index_start_data(response, read_status); 
 				int diference = read_status - start_data; 	 
 				bytes_read+= diference; 
-				write(id_file, response+start_data, diference); 					
+				write(id_file, response+start_data, diference); 	
+			}
+			else {
+				f_exit = true; 
+			}				
 		}
+	}
+
+
+	if (status_http_protocol != 1) {			//ocurrio un error. 
+		printf("something went wrong"); 
+		switch(status_http_protocol) {
+			
+		}
+		
 	}
 
 
