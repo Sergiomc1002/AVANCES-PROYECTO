@@ -18,6 +18,8 @@ int main( int argc, char * argv[] ) {
 //./client 163.178.104.187:80/RioCeleste-VolcanTenorio.jpg
 //./client 163.178.104.81	-> ecci
 //./cient 163.178.104.187/index.html
+//./client 163.178.104.187/ci0123/ProyectoProgramado.pdf 
+//./client 163.178.104.187/ci0123/LogoECCI.png
 
 
 	Socket s( 's', false);
@@ -41,6 +43,8 @@ int main( int argc, char * argv[] ) {
 
 	int write_status = s.Write(request);
 
+	
+	
 	char* response = (char*)calloc(1024, sizeof(char));
 
 	int bytes_read = 0; 
@@ -58,7 +62,7 @@ int main( int argc, char * argv[] ) {
 			memset(response, 0, 1024 * sizeof(char)); 	
 		}
 		else {		//primera iteración se lee el header. 
-			if (status_http_protocol = get_http_status(response, read_status)) {		//podemos manejar unos codigos internos, 1, todo bien, 2 otra cosa etc. 
+			if ((status_http_protocol = get_http_status(response, read_status)) == 1) {		//podemos manejar unos codigos internos, 1, todo bien, 2 otra cosa etc. 
 				char* extension = get_file_extension(response); 
 				strcat(file, extension); 
 				id_file = creat(file, S_IRUSR | S_IWUSR);				
@@ -85,6 +89,8 @@ int main( int argc, char * argv[] ) {
 
 	close(id_file); 
 
+	
+	
 	//free_initial_values(start_values); 
    
 }

@@ -116,16 +116,45 @@ char* make_request_header(char* filename)
 //body
 
 //req: file exists
+
+char* get_extension_filename(char* filename) {
+	char* file_type = (char*)calloc(10, sizeof(char));
+	int index_filename = 0; 
+	int len_filename = strlen(filename);
+	while (index_filename < len_filename && *(filename+index_filename) != '.') {
+		++index_filename; 
+	}
+	++index_filename;
+	int counter = 0;  
+	while(index_filename < len_filename) {
+		*(file_type+counter) = *(filename+index_filename); 
+		++index_filename; 
+		++counter; 
+	}  
+	return file_type; 
+}
+
 char* make_response_header(char* filename, int content_length)
 {
     char* response_header = (char*)calloc(1, REQUEST_HEADER_SIZE);
+	char* end_header = (char*)"\r\n\r\n"; 
+	char* end_line = (char*)"\r\n"; 
+	char* len_file = (char*)"Content-Length: "; 
+	char* type_file = (char*)"Content-Type: "; 
+	char* file = (char*)"file/"; 				//ver linea donde dice char* exntesion, abajo. 
 
-    char * response = (char*)"HTTP/1.1 200 OK\nContent-Length: ";
-    int r_size = strlen(response);
+    char * response = (char*)"HTTP/1.1 200 OK\r\n";
+    
     strcpy(response_header, response);
-
-    strcpy(response_header + r_size, (char*)content_length + '0');
-
+	strcpy(response_header+strlen(response_header), len_file); 	//no puede hacer + '0', eso daña el formato, tiene que usar strcat o strcpy, o hacerlo a pata. 
+    //de momento el campo de len queda vacio, hay que agregarlo. 
+    strcpy(response_header+strlen(response_header), end_line); 
+    strcpy(response_header+strlen(response_header), type_file); 
+    char* extension = get_extension_filename(filename);
+    //en un futoro, ese file, no debe decir file, si el archivo es html, debe decir text, si es pdf debe decir application, si es imagen decir image. so on. 
+    strcpy(response_header+strlen(response_header), file);
+    strcpy(response_header+strlen(response_header), extension); 
+    strcpy(response_header+strlen(response_header), end_header);   
     return response_header;
 }
 

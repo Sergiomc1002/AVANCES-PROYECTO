@@ -26,42 +26,64 @@ int thread_id;
 
 
 void* run(void* data) { 
-	
-	std::string answer_to_client = "mensaje recibido"; 
+
 	char* msg_from_client = (char*)calloc(512, sizeof(char));  
 	char* final_answer = (char*)calloc(512, sizeof(char));  
 
 	thread_data_t* thread_data = (thread_data_t*)data;
 
-	printf("soy el thread : %d y estoy atendiendo al cliente : %d\n", thread_data->thread_id, thread_data->client_id); 
-
-
 	if(-1 == thread_data->server_socket->Read(msg_from_client,512,thread_data->client_id)) {
-	perror("there was an error");
+		perror("there was an error");
 	}
-
+	
 	char* filename = get_file_name(msg_from_client);
-	printf("Server Filename: %s\n", filename);
 
-	int fd = open(filename, O_RDONLY);
+	printf("se esta pidiendo el archivo : %s\n", filename); 
 
-	if (fd != -1)
-	{
-		printf("File exists\n");
-	} 
-	else {
-		printf("File does not exists\n");
+	char* response_header = make_response_header(filename, 0); 		//ese 0, deberian ser la cantidad de bytes del archivo. 
+	
+	
+	char* header_with_data = (char*)calloc(120+1024, sizeof(char));		//dejarle campo para el header, y la primera lectura de datos.  
+	
+	
+	char* buffer_to_read_file = (char*)calloc(1024, sizeof(char)); 
+	
+	int read_status = 0;  
+	int bytes_read = 0; 
+	bool end_read = false; 
+	
+	int file_id = open(filename, O_RDONLY); 
+
+	printf("el id del archivo es : %d\n", file_id); 
+
+	/*
+	if (file_id != -1) {
+		while (!end_read) {
+			if (bytes_read != 0) {
+				if((read_status = read(file_id, buffer_to_read_file, 1024)) != 0) {
+					
+					thread_data->server_socket->Write(buffer_to_read_file, thread_data->client_id);
+					memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 	
+					bytes_read+= read_status; 		
+				
+				}
+				else {
+					end_read = true; 		//ya termine de leer. 
+				} 		
+			}
+			else {		//es la primera iteración, tengo que leer menos datos, para hacerle campo al header. 
+				read_status = read(file_id, buffer_to_read_file, 1024-120); 
+				strcpy(header_with_data+strlen(header_with_data), buffer_to_read_file);	//es lo primero que se manda, el header, con un poco de info. 
+				thread_data->server_socket->Write(header_with_data, thread_data->client_id);
+				memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 	
+				bytes_read+= read_status; 
+			}	
+		}	
 	}
-
-	// else {
-	// printf("soy el server y recibi 1 mensaje : \n %s", msg_from_client);
-	// }
-
-
-	strcpy(final_answer, answer_to_client.c_str());		
-
-
-	thread_data->server_socket->Write(final_answer, thread_data->client_id);
+	else {
+		printf("el archivo no existe"); 
+	}
+	*/
 	
 	free(msg_from_client);
 	free(final_answer);  
