@@ -287,7 +287,7 @@ void set_initial_values(data_arguments_t *data_arguments, char* request) {
 		data_arguments->server_port = atoi(data_arguments->port); 
 	}
 	else {
-		data_arguments->server_port = SERVER_PORT;
+		data_arguments->server_port = PORT_TO_CONNECT;
 	}
 			
 }

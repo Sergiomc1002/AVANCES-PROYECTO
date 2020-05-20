@@ -7,10 +7,6 @@
 #include "socket.h"
 #include <fcntl.h>
 #include <unistd.h>
-//#define SERVER_PORT 7002
-#define SERVER_PORT 80
-
-
 
 int main( int argc, char * argv[] ) {
 
@@ -55,14 +51,15 @@ int main( int argc, char * argv[] ) {
 	int status_http_protocol = 0; 
 
 
+	
 	while((read_status = s.Read(response, 1024)) > 0 && !f_exit) {
 		if (bytes_read != 0) {
 			bytes_read+= read_status; 	
 			write(id_file, response, read_status);
 			memset(response, 0, 1024 * sizeof(char)); 	
 		}
-		else {		//primera iteración se lee el header. 
-			if ((status_http_protocol = get_http_status(response, read_status)) == 1) {		//podemos manejar unos codigos internos, 1, todo bien, 2 otra cosa etc. 
+		else {	
+			if ((status_http_protocol = get_http_status(response, read_status)) == 1) {	
 				char* extension = get_file_extension(response); 
 				strcat(file, extension); 
 				id_file = creat(file, S_IRUSR | S_IWUSR);				
@@ -87,8 +84,8 @@ int main( int argc, char * argv[] ) {
 	}
 
 
-	close(id_file); 
 
+	close(id_file); 	
 	
 	
 	//free_initial_values(start_values); 

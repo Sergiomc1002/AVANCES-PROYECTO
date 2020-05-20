@@ -1,14 +1,13 @@
 #define FILE_NAME_SIZE 120
 #define REQUEST_HEADER_SIZE 120
 #define RESPONSE_HEADER_SIZE 120
-#define SERVER_PORT 80
-//#define SERVER_PORT 7002
+#define PORT_TO_CONNECT 80
 
 typedef struct {
 	char* ip_address; 
 	char* filename; 
 	char* port; 
-	int server_port; 		//despues hay que convertirlo a entero. 
+	int server_port; 
 	
 }data_arguments_t; 
 
