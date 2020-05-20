@@ -73,8 +73,17 @@ void* run(void* data) {
 		//el archivo no existe, y hay que responderle al cliente, que lo que pide no existe. 
 	}
 
+	//free(thread_data); 
+	
+	
+	//free(filename); 
+	
+	free(response_header); 
+	
 	free(msg_from_client);
 	free(buffer_to_read_file); 
+	
+	
 	thread_data->server_socket->Shutdown(thread_data->client_id);
 }
 
