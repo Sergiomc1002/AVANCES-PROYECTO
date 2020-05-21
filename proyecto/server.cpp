@@ -43,48 +43,53 @@ void* run(void* data) {
 	bool end_read = false; 
 	
 	int file_id = open(filename, O_RDONLY); 
-
+	printf("file id: %d\n",file_id);
+	printf("%s", buffer_to_read_file);
 	
-	if (-1 != file_id) {		
-		while (!end_read) {
-			
+	if (-1 != file_id) {
+		while(end_read == false) {
 			if (bytes_read != 0) {
 				if((read_status = read(file_id, buffer_to_read_file, 1024)) != 0) {
+					// printf("%s\n",buffer_to_read_file);
+					// printf("======================================================================");
+					printf("SERVER VA A ESCRIBIR: %d\n",read_status );
 					
-					thread_data->server_socket->Write(buffer_to_read_file, thread_data->client_id);
+					thread_data->server_socket->Write(buffer_to_read_file, thread_data->client_id, read_status);
 					memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 	
-					bytes_read+= read_status; 		
-				
+					bytes_read+= read_status; 
+					
 				}
 				else {
 					end_read = true; 	
 				} 		
 			}
 			else {
-				read_status = read(file_id, buffer_to_read_file+len_header, 1024-len_header);  
-				thread_data->server_socket->Write(buffer_to_read_file, thread_data->client_id);
+				read_status = read(file_id, buffer_to_read_file+len_header, 1024-len_header); 
+				thread_data->server_socket->Write(buffer_to_read_file, thread_data->client_id, 1024);
 				memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 	
-				bytes_read+= read_status; 
+				bytes_read+= read_status;
+				
 			}	
-		}	
-			
+		}		
 	}
 	else {
 		//el archivo no existe, y hay que responderle al cliente, que lo que pide no existe. 
 	}
-
+		
+	
 	//free(thread_data); 
 	
-	
-	//free(filename); 
+	free(filename); 
 	
 	free(response_header); 
 	
 	free(msg_from_client);
-	free(buffer_to_read_file); 
+	//free(buffer_to_read_file); 
 	
 	
 	thread_data->server_socket->Shutdown(thread_data->client_id);
+	void * asd;
+	pthread_exit(asd);
 }
 
 

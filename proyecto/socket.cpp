@@ -132,15 +132,10 @@ int Socket::Read(char* text, int len) {		//soy el cliente y quiero hacerle read 
 
 
 
-int Socket::Write( char *text, int id_socket) {	//el servidor escribiendole al cliente. 
-	int status = write(id_socket, text, strlen(text)); 	
-
-	int close_status = close(id_socket);
-	if (close_status == -1) {
-		perror("there was an error trying to close the client after sending response"); 
-	}
-	else{
-		printf("Connection closed\n");
+int Socket::Write( char *text, int id_socket, int length) {	//el servidor escribiendole al cliente. 
+	int status = write(id_socket, text, length); 	
+	if (status == -1) {
+		perror("ERROR EN WRITE"); 
 	}
 	return status; 
 }
@@ -281,11 +276,14 @@ void Socket::SetIDSocket(int id){
 }
 
 int Socket::Shutdown() {
-	return close(this->id); 
+	printf("CONECTION CLOSED");
+	return close(this->id);
+	
 }
 
 
 int Socket::Shutdown(int client_id) {
+	printf("CONECTION CLOSED");
 	return close(this->client_id);
 }
 

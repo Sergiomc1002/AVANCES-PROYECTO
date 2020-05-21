@@ -11,7 +11,7 @@ class Socket{
         int Connect( char *, char * );
         int Read( char *, int len,  int id_socket);	
         int Read(char*, int len); 
-        int Write( char *, int id_socket);		//para el server escribirle al cliente. 
+        int Write( char *, int id_socket, int);		//para el server escribirle al cliente. 
         int Write(char*); 						//para el cliente escribirle al server. 
         int Listen( int );
         int Bind( int, int);

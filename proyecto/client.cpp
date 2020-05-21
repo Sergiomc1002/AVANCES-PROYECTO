@@ -53,8 +53,10 @@ int main( int argc, char * argv[] ) {
 
 	
 	while((read_status = s.Read(response, 1024)) > 0 && !f_exit) {
+		printf("CLIENTE ESTA RECIBIENDO:\n");
+		printf("%d\n",read_status);	
 		if (bytes_read != 0) {
-			bytes_read+= read_status; 	
+			bytes_read+= read_status;	
 			write(id_file, response, read_status);
 			memset(response, 0, 1024 * sizeof(char)); 	
 		}
@@ -66,7 +68,8 @@ int main( int argc, char * argv[] ) {
 				start_data = get_index_start_data(response, read_status); 
 				int diference = read_status - start_data; 	 
 				bytes_read+= diference; 
-				write(id_file, response+start_data, diference); 	
+				write(id_file, response+start_data, diference); 
+				memset(response, 0, 1024 * sizeof(char));
 			}
 			else {
 				f_exit = true; 
@@ -91,4 +94,3 @@ int main( int argc, char * argv[] ) {
 	//free_initial_values(start_values); 
    
 }
-
