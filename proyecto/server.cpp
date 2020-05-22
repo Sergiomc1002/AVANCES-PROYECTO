@@ -29,30 +29,31 @@ void* run(void* data) {
 	if(-1 == thread_data->server_socket->Read(msg_from_client,512,thread_data->client_id)) {
 		perror("there was an error");
 	}
-	
 	char* filename = get_file_name(msg_from_client);
-
 	char* response_header = make_response_header(filename, 0); 		//ese 0, deberian ser la cantidad de bytes del archivo. 
-	
 	char* buffer_to_read_file = (char*)calloc(1024, sizeof(char)); 
 	
 	strcpy(buffer_to_read_file, response_header); 
 	int len_header = strlen(buffer_to_read_file);  
 	int read_status = 0;  
 	int bytes_read = 0; 
-	bool end_read = false; 
-	
-	int file_id = open(filename, O_RDONLY); 
-	printf("file id: %d\n",file_id);
-	printf("%s", buffer_to_read_file);
-	
+	bool end_read = false;
+	int file_id = -1;
+	bool directorio = es_directorio(filename);
+	if(directorio){
+		char * temp = new char [200];
+		temp[0] = '/';
+		strcpy(temp+1,filename);
+		file_id = open(temp, O_RDONLY);
+		//delete temp;
+	}
+	else{
+		file_id = open(filename, O_RDONLY);
+	}
 	if (-1 != file_id) {
 		while(end_read == false) {
 			if (bytes_read != 0) {
 				if((read_status = read(file_id, buffer_to_read_file, 1024)) != 0) {
-					// printf("%s\n",buffer_to_read_file);
-					// printf("======================================================================");
-					printf("SERVER VA A ESCRIBIR: %d\n",read_status );
 					
 					thread_data->server_socket->Write(buffer_to_read_file, thread_data->client_id, read_status);
 					memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 	
@@ -76,18 +77,12 @@ void* run(void* data) {
 		//el archivo no existe, y hay que responderle al cliente, que lo que pide no existe. 
 	}
 		
-	
-	//free(thread_data); 
-	
-	free(filename); 
-	
-	free(response_header); 
-	
-	free(msg_from_client);
-	//free(buffer_to_read_file); 
-	
-	
+	//free(filename); 
+	// free(response_header); 
+	// free(msg_from_client);
+	// free(buffer_to_read_file); 
 	thread_data->server_socket->Shutdown(thread_data->client_id);
+	//free(thread_data); 
 	void * asd;
 	pthread_exit(asd);
 }

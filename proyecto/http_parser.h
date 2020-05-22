@@ -1,6 +1,6 @@
-#define FILE_NAME_SIZE 120
-#define REQUEST_HEADER_SIZE 120
-#define RESPONSE_HEADER_SIZE 120
+#define FILE_NAME_SIZE 500
+#define REQUEST_HEADER_SIZE 500
+#define RESPONSE_HEADER_SIZE 500
 #define PORT_TO_CONNECT 80
 
 typedef struct {
@@ -30,3 +30,7 @@ extern int get_index_start_data(char* response, int read_status);
 extern int get_http_status(char* response_header, int read_status); 
 
 extern char* get_extension_filename(char* filename); 
+
+extern char* extract_name(char * name);
+
+extern bool es_directorio(char * filename);

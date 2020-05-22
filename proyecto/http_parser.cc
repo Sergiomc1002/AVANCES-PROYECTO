@@ -52,7 +52,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+//#include <string>
 
 /*
     header: char* containing the header
@@ -241,9 +241,9 @@ return start_data;
 
 void set_initial_values(data_arguments_t *data_arguments, char* request) {
 	
-	data_arguments->ip_address = (char*)calloc(20, sizeof(char)); 
-	data_arguments->filename = (char*)calloc(20, sizeof(char)); 
-	data_arguments->port = (char*)calloc(20, sizeof(char)); 
+	data_arguments->ip_address = (char*)calloc(200, sizeof(char)); 
+	data_arguments->filename = (char*)calloc(200, sizeof(char)); 
+	data_arguments->port = (char*)calloc(200, sizeof(char)); 
    
 	bool found_end = false; 
 	int counter = 0; 
@@ -344,7 +344,59 @@ void free_initial_values(data_arguments_t* data_arguments) {
 504 Gateway Timeout 	The gateway has timed out.
 505 HTTP Version Not Supported 	The server does not support the "http protocol" version.
 */
+char* extract_name(char * address){
+	bool pare = false;
+	int contador = 0;
+	char* buf = new char[100];
+	int index = -1;
+	int length = strlen(address);
+	if(length > 0){
+		while(contador < length){
+		if(address[contador] == '/'){
+			index = contador;
+		}
+		contador++;
+		}
+		contador = 0;
+		if(index != -1){
+			index++;
+			while(!pare && index < length){
+				if(address[index] != '.'){
+					buf[contador] = address[index];
+				}
+				else{
+					buf[contador] = address[index];
+					pare = true;
+				}
+				index++;
+				contador++;
+			}
+		}	
+		else{
+			printf("ERROR");
+		}
+			
+	}
+	else{
+		strcpy(buf,"index.");
+	}
+	
+	return buf;
+}
 
+bool es_directorio(char * filename){
+	bool esDirectorio = false;
+	int length = strlen(filename);
+	int contador = 0;
+	while(contador < length){
+		if(filename[contador] == '/'){
+			esDirectorio = true;
+			contador = length;	
+		}
+		contador++;
+	}
+	return esDirectorio;
+}
 
 
 int get_http_status(char* response_header, int read_status) {
