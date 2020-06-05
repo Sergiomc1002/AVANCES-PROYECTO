@@ -109,7 +109,7 @@ char* make_request_header(char* filename)
 
     return request_header;
 }
-//GET / HTTP/1.1\r\nhost: SERVIDOR LOCAL\r\n\r\n
+//GET / HTTP/1.1
 //HTTP/1.1 200 OK
 //Content-Length: 1200
 //(blank line)
