@@ -43,6 +43,7 @@ class Semaphore {
     char* getName() { return name;}			// debugging assist
     int getValue() { return value; }
     void Destroy();
+    void setValue(int value); 
     
     void P();	 // these are the only operations on a semaphore
     void V();	 // they are both *atomic*
@@ -129,6 +130,7 @@ class Condition {
 					// lock and going to sleep are 
 					// *atomic* in Wait()
     void Signal(Lock *conditionLock);   // conditionLock must be held by
+    void Down(Lock* conditionLock); 
     void Broadcast(Lock *conditionLock);// the currentThread for all of 
 					// these operations
 

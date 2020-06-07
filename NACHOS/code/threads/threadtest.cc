@@ -68,7 +68,7 @@ void producer(void* data) {
 				buffer[*items] = item; 
 				(*items)++;
 			
-			consumer_condition->Signal(lock); 
+			consumer_condition->Signal(lock);
 			lock->Release();
 		
 		} 
@@ -104,6 +104,7 @@ void consumer(void* data) {
 
 
 			producer_condition->Signal(lock); 
+			consumer_condition->Down(lock); 			//no es necesario, pero lo hace más eficiente. 
 			lock->Release();
 		} 
 	}

@@ -91,10 +91,15 @@ Semaphore::V()
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
 
     thread = queue->Remove();
-    if (thread != NULL)	 
+    if (thread != NULL)	
 	scheduler->ReadyToRun(thread);
 	value++;
 	interrupt->SetLevel(oldLevel);
+}
+
+
+void Semaphore::setValue(int value) {
+		this->value = value; 
 }
 
 #ifdef USER_PROGRAM
@@ -166,6 +171,12 @@ void Condition::Wait( Lock * conditionLock ) {
 
 void Condition::Signal( Lock * conditionLock ) {
 	semaphore->V(); 
+}
+
+void Condition::Down(Lock* conditionLock) {
+	int current_value = this->semaphore->getValue(); 
+	--current_value; 
+	this->semaphore->setValue(current_value); 
 }
 
 
