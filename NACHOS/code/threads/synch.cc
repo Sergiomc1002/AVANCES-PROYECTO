@@ -91,10 +91,10 @@ Semaphore::V()
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
 
     thread = queue->Remove();
-    if (thread != NULL)	   // make thread ready, consuming the V immediately
+    if (thread != NULL)	 
 	scheduler->ReadyToRun(thread);
-    value++;
-    interrupt->SetLevel(oldLevel);
+	value++;
+	interrupt->SetLevel(oldLevel);
 }
 
 #ifdef USER_PROGRAM
@@ -123,22 +123,22 @@ Semaphore::Destroy()
 // Note -- without a correct implementation of Condition::Wait(), 
 // the test case in the network assignment won't work!
 Lock::Lock(const char* debugName) {
-
+	this->semaphore = new Semaphore(debugName, 1);
 }
 
 
 Lock::~Lock() {
-
+	delete semaphore;
 }
 
 
 void Lock::Acquire() {
-
+	semaphore->P();
 }
 
 
 void Lock::Release() {
-
+	semaphore->V(); 
 }
 
 
@@ -148,26 +148,31 @@ bool Lock::isHeldByCurrentThread() {
 
 
 Condition::Condition(const char* debugName) {
-
+	this->semaphore = new Semaphore(debugName, 0);
 }
 
 
 Condition::~Condition() {
-
+	delete semaphore; 
 }
 
 
 void Condition::Wait( Lock * conditionLock ) {
-
+	conditionLock->Release(); 
+	semaphore->P(); 
+	conditionLock->Acquire(); 
 }
 
 
 void Condition::Signal( Lock * conditionLock ) {
-
+	semaphore->V(); 
 }
 
 
 void Condition::Broadcast( Lock * conditionLock ) {
+	while(semaphore->getValue() <= 0) {
+		semaphore->V(); 
+	}
 }
 
 

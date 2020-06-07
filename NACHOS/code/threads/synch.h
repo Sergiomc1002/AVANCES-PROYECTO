@@ -81,6 +81,7 @@ class Lock {
 
   private:
     char* name;				// for debugging
+    Semaphore* semaphore; 
     // plus some other stuff you'll need to define
 };
 
@@ -133,6 +134,7 @@ class Condition {
 
   private:
     char* name;
+    Semaphore* semaphore; 
     // plus some other stuff you'll need to define
 };
 
