@@ -81,13 +81,33 @@ void NachOS_Write() {		// System call 6
 //machine -> ReadMem(addres(registro X), cuantos caracteres leer (1), a donde se va a guardar ) //directorio machine, lee 1 byte a la vez, se usa para traer datos de la memori
 		//Readmem(4,1,&buffer); se lee 1 caracter del registro 4  // 'a'
 	int addr, count, file;
-	int c;
    addr = machine->ReadRegister( 4 );
    count = machine->ReadRegister( 5 );
    file = machine->ReadRegister( 6 );
-   machine->ReadMem( addr+1, 1, &c );
+   
+   int c; 
+   for (int index = 0; index < count; ++index) { 
+		machine->ReadMem( addr+index, 1, &c);
+		printf("%c", c);
+	}
+   
+   
+   /*
+   int *buffer = (int*)calloc(count, sizeof(int)); 
+  
+   
+   for (int index_data = 0; index_data < count; ++index_data) { 
+		machine->ReadMem( addr+index_data, 1, buffer+index_data);
+   }
 
-   printf("Estamos en el write addr:%d count:%d file:%d %c \n", addr, count, file, c );
+	printf("%s\n", buffer);
+
+	free(buffer); 
+	
+	*/
+
+
+   //printf("Estamos en el write addr:%d count:%d file:%d %c \n", addr, count, file, c );
    machine->WriteRegister( PrevPCReg, machine->ReadRegister( PCReg ) );
    machine->WriteRegister( PCReg, machine->ReadRegister( NextPCReg ) );
    machine->WriteRegister( NextPCReg, machine->ReadRegister( NextPCReg ) + 4 );
