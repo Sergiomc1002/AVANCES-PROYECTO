@@ -894,6 +894,8 @@ translate.o: ../machine/translate.cc /usr/include/stdc-predef.h \
  ../threads/list.h ../machine/stats.h ../machine/timer.h \
  ../userprog/bitmap.h ../filesys/openfile.h ../filesys/synchdisk.h \
  ../machine/disk.h ../threads/synch.h
+nachostabla.o: ../userprog/nachostabla.cc /usr/include/stdc-predef.h \
+ ../userprog/nachostabla.h
 directory.o: ../filesys/directory.cc /usr/include/stdc-predef.h \
  ../threads/copyright.h ../threads/utility.h ../threads/copyright.h \
  ../machine/sysdep.h /usr/include/c++/6/stdlib.h \

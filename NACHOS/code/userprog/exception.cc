@@ -52,6 +52,17 @@ void NachOS_Halt() {		// System call 0
  *  System call interface: void Exit( int )
  */
 void NachOS_Exit() {		// System call 1
+	
+	//devolver los de addrespace: colocar las paginas como libres
+	//Caso especial, que el que haga exit sea un hilo.
+	//los hilos comparte Text, Data.
+	//lo unico que hay que devolver es la pila. 
+	
+	//debe devolver un valor al join, si algun otro proceso espera por mi. 
+	
+	
+	//currentThread->Finish()
+	
 }
 
 
@@ -87,6 +98,13 @@ void NachOS_Open() {		// System call 5
  *  System call interface: OpenFileId Write( char *, int, OpenFileId )
 											//reg4 , reg5, reg6
  */
+ 
+ 
+ 
+//NOTA PARA WRITE 
+//El método ReadMem solo puede leer enteros, ver el tercer parámetro, por lo que se recomienda que las tiras de caracteres 
+//se lean caracter por caracter (for) e irlas almacenando en una variable local, por ejemplo, char buffer[ 100 ];  
+ 
 void NachOS_Write() {		// System call 6
 	//char buffer;
 //machine -> ReadRegister(X) // x = lee el registro 4(x) //devuelve un indice de la memoria de usuario 
@@ -103,25 +121,58 @@ void NachOS_Write() {		// System call 6
 		machine->ReadMem( addr+index, 1, &c);
 		printf("%c", c);
 	}
-    
-   
-   /*
+	
+	
+/*
    int *buffer = (int*)calloc(count, sizeof(int)); 
   
    
    for (int index_data = 0; index_data < count; ++index_data) { 
 		machine->ReadMem( addr+index_data, 1, buffer+index_data);
    }
-
 	printf("%s\n", buffer);
-
 	free(buffer); 
 	
-	*/
-
-
-   //printf("Estamos en el write addr:%d count:%d file:%d %c \n", addr, count, file, c );
+	*/	
+	
+	
 }
+
+//PENDIENTE - LO QUE FALTA DE WRITE. 
+//void Write(
+//        char * buffer = NULL;
+//        int size = machine->ReadRegister( 5 );	// Read size to write
+
+          // buffer = Read data from address given by user;
+//        OpenFileId id = machine->ReadRegister( 6 );	// Read file descriptor
+
+	// Need a semaphore to synchronize access to console
+	// Console->P();
+//	switch (id) {
+//		case  ConsoleInput:	// User could not write to standard input
+//			machine->WriteRegister( 2, -1 );
+//			break;
+//		case  ConsoleOutput:
+//			buffer[ size ] = 0;
+//			printf( "%s", buffer );
+//		break;
+//		case ConsoleError:	// This trick permits to write integers to console
+//			printf( "%d\n", machine->ReadRegister( 4 ) );
+//			break;
+//		default:	// All other opened files
+			// Verify if the file is opened, if not return -1 in r2
+			// Get the unix handle from our table for open files
+			// Do the write to the already opened Unix file
+			// Return the number of chars written to user, via r2
+//			break;
+
+//	}
+	// Update simulation stats, see details in Statistics class in machine/stats.cc
+	// Console->V();
+
+//}       // Nachos_Write
+
+
 
 
 /*
@@ -307,6 +358,13 @@ void NachOS_Shutdown() {	// System call 25
 //	"which" is the kind of exception.  The list of possible exceptions 
 //	are in machine.h.
 //----------------------------------------------------------------------
+
+
+
+
+
+//PENDIENTE:
+//Modificar el método ExceptionHandler de manera que podamos agregar los llamados al sistema que vayamos ocupando
 
 void
 ExceptionHandler(ExceptionType which)

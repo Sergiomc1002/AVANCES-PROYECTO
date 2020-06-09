@@ -1,0 +1,16 @@
+
+code/userprog/nachostabla.cc
+HACER TODA LA CLASE
+
+code/userprog/addrspace.cc
+AddrSpace::~AddrSpace() -> terminar esto. 
+
+code/userprog/exception.cc
+void NachOS_Exit() ->terminar esto. 
+
+
+code/userprog/exception.cc
+void NachOS_Write() -> aun no esta terminado
+
+code/userprog/exception.cc
+void ExceptionHandler() -> terminar esto. 
