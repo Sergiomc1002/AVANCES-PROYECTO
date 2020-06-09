@@ -105,7 +105,7 @@ Machine::RaiseException(ExceptionType which, int badVAddr)
 //  ASSERT(interrupt->getStatus() == UserMode);
     registers[BadVAddrReg] = badVAddr;
     DelayedLoad(0, 0);			// finish anything in progress
-    interrupt->setStatus(SystemMode);
+    interrupt->setStatus(SystemMode);	//se cambia de modo usuario a modo sistema. 
     ExceptionHandler(which);		// interrupts are enabled at this point
     interrupt->setStatus(UserMode);
 }

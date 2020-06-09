@@ -25,6 +25,18 @@
 #include "system.h"
 #include "syscall.h"
 
+
+
+
+void returnFromSystemCall() {
+
+		machine->WriteRegister( PrevPCReg, machine->ReadRegister( PCReg ) );
+		machine->WriteRegister( PCReg, machine->ReadRegister( NextPCReg ) );
+		machine->WriteRegister( NextPCReg, machine->ReadRegister( NextPCReg ) + 4 );
+
+}       // returnFromSystemCall
+
+
 /*
  *  System call interface: Halt()
  */
@@ -80,6 +92,7 @@ void NachOS_Write() {		// System call 6
 //machine -> ReadRegister(X) // x = lee el registro 4(x) //devuelve un indice de la memoria de usuario 
 //machine -> ReadMem(addres(registro X), cuantos caracteres leer (1), a donde se va a guardar ) //directorio machine, lee 1 byte a la vez, se usa para traer datos de la memori
 		//Readmem(4,1,&buffer); se lee 1 caracter del registro 4  // 'a'
+	
 	int addr, count, file;
    addr = machine->ReadRegister( 4 );
    count = machine->ReadRegister( 5 );
@@ -90,7 +103,7 @@ void NachOS_Write() {		// System call 6
 		machine->ReadMem( addr+index, 1, &c);
 		printf("%c", c);
 	}
-   
+    
    
    /*
    int *buffer = (int*)calloc(count, sizeof(int)); 
@@ -108,9 +121,6 @@ void NachOS_Write() {		// System call 6
 
 
    //printf("Estamos en el write addr:%d count:%d file:%d %c \n", addr, count, file, c );
-   machine->WriteRegister( PrevPCReg, machine->ReadRegister( PCReg ) );
-   machine->WriteRegister( PCReg, machine->ReadRegister( NextPCReg ) );
-   machine->WriteRegister( NextPCReg, machine->ReadRegister( NextPCReg ) + 4 );
 }
 
 
@@ -386,22 +396,22 @@ ExceptionHandler(ExceptionType which)
                 break;
 
              case SC_Socket:	// System call # 20
-		NachOS_Socket();
+				NachOS_Socket();
                break;
              case SC_Connect:	// System call # 21
-		NachOS_Connect();
+				NachOS_Connect();
                break;
              case SC_Bind:	// System call # 22
-		NachOS_Bind();
+				NachOS_Bind();
                break;
              case SC_Listen:	// System call # 23
-		NachOS_Listen();
+				NachOS_Listen();
                break;
              case SC_Accept:	// System call # 22
-		NachOS_Accept();
+				NachOS_Accept();
                break;
              case SC_Shutdown:	// System call # 23
-		NachOS_Shutdown();
+				NachOS_Shutdown();
                break;
 
              default:
@@ -409,6 +419,7 @@ ExceptionHandler(ExceptionType which)
                 ASSERT( false );
                 break;
           }
+          returnFromSystemCall();
           break;
 
        case PageFaultException: {
