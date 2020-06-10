@@ -72,6 +72,9 @@ AddrSpace::AddrSpace(OpenFile *executable)
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
 			+ UserStackSize;	// we need to increase the size
 						// to leave room for the stack
+	
+	printf("tamaño texto : %d - tamalo dato : %d - tamaño dato sin inicializar : %d - tamaño pila : %d\n", noffH.code.size, noffH.initData.size, noffH.uninitData.size, UserStackSize); 					
+	
     numPages = divRoundUp(size, PageSize);
     size = numPages * PageSize;
 
@@ -87,14 +90,16 @@ AddrSpace::AddrSpace(OpenFile *executable)
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
 	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	pageTable[i].physicalPage = memoryMap->Find();
-	pageTable[i].valid = true;
-	pageTable[i].use = false;
-	pageTable[i].dirty = false;
+								//siento que a memoryMap le tiene que entrar la pagina. 
+	pageTable[i].physicalPage = memoryMap->Find();//yo creo que esto deberia evaluar la pagina, si es de texto o datos puede ya existir, entonces,deme esa pos. 
+	pageTable[i].valid = true;						//si es datos no inicializados o pila, si tiene que buscar un campo libre en la memoria para el nuevo
+	pageTable[i].use = false;						//hilo, esto tmbn afecta el for de abajo, ya que si la pag ya existe en memoria, no hay que moverla. 
+	pageTable[i].dirty = false;						//entonces memoyMap me da una pos, de algo que ya existe en memoria, o en donde va a existir. 
 	pageTable[i].readOnly = false;  // if the code segment was entirely on 
 					// a separate page, we could set its 
 					// pages to be read-only
     }
+    
     
 // zero out the entire address space, to zero the unitialized data segment 
 // and the stack segment

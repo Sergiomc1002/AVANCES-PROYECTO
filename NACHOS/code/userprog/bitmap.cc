@@ -57,6 +57,11 @@ BitMap::Mark(int which)
 //	"which" is the number of the bit to be cleared.
 //----------------------------------------------------------------------
 
+
+unsigned int * BitMap::get_map(){
+	return this->map; 
+}
+
 void 
 BitMap::Clear(int which) 
 {

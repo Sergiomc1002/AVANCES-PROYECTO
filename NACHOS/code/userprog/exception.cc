@@ -27,7 +27,6 @@
 
 
 
-
 void returnFromSystemCall() {
 
 		machine->WriteRegister( PrevPCReg, machine->ReadRegister( PCReg ) );
@@ -111,17 +110,49 @@ void NachOS_Write() {		// System call 6
 //machine -> ReadMem(addres(registro X), cuantos caracteres leer (1), a donde se va a guardar ) //directorio machine, lee 1 byte a la vez, se usa para traer datos de la memori
 		//Readmem(4,1,&buffer); se lee 1 caracter del registro 4  // 'a'
 	
-	int addr, count, file;
+	int addr, count;
+	int file = 0; 
    addr = machine->ReadRegister( 4 );
    count = machine->ReadRegister( 5 );
+   
    file = machine->ReadRegister( 6 );
    
-   int c; 
-   for (int index = 0; index < count; ++index) { 
-		machine->ReadMem( addr+index, 1, &c);
-		printf("%c", c);
+  //Semaphore* semaphore = new Semaphore("semaphore_write", 1); 
+  
+  //semaphore->P();
+	switch(file) {
+		case ConsoleOutput:
+		   int c; 
+		   for (int index = 0; index < count; ++index) { 
+				machine->ReadMem( addr+index, 1, &c);
+				printf("%c", c);
+			}		
+			break;
+		
+		case ConsoleInput:
+			machine->WriteRegister( 2, -1 );		//registro 2, es de retorno, -1 de error, no se puede escribir en el Console input. 
+		break; 
+		
+		case ConsoleError:
+		
+		break; 
+		
+		default:
+			
+			// Verify if the file is opened, if not return -1 in r2
+			// Get the unix handle from our table for open files
+			// Do the write to the already opened Unix file
+			// Return the number of chars written to user, via r2		
+		
+		break; 
 	}
 	
+	
+	
+   //semaphore->V();
+   /*
+
+	*/
 	
 /*
    int *buffer = (int*)calloc(count, sizeof(int)); 

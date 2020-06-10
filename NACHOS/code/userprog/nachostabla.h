@@ -8,6 +8,9 @@
 #ifndef NACHOS_TABLA
 #define NACHOS_TABLA
 
+
+#define MAX_FILES 20;
+
 class NachosOpenFilesTable {
   public:
     NachosOpenFilesTable();       // Initialize 
@@ -17,16 +20,18 @@ class NachosOpenFilesTable {
     int close( int nachos_handle );      // Unregister the file handle
     bool is_opened( int nachos_handle );
     int get_unix_handle( int nachos_handle );
-    void add_thread();		// If a user thread is using this table, add it
-    void del_thread();		// If a user thread is using this table, delete it
+    void add_thread();		// ESTO CREO QUE SE TENDRIA QUE HACER EL EL FORK()
+    void del_thread();		// 
 
     void print();               // Print contents
+    int get_current_index(); 
     
   private:
-    int * openFiles;		// A vector with user opened files
-    BitMap * openFilesMap;	// A bitmap to control our vector
+    int * open_files;		// A vector with user opened files
+    BitMap * open_files_map;	// A bitmap to control our vector
     int usage;			// How many threads are using this table
-
+	int current_length;
+	int max_length;  
 };
 
 #endif

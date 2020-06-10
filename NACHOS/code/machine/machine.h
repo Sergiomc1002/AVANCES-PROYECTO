@@ -157,7 +157,6 @@ class Machine {
 				// code and data, while executing
     int registers[NumTotalRegs]; // CPU registers, for executing user programs
 
-
 // NOTE: the hardware translation of virtual addresses in the user program
 // to physical addresses (relative to the beginning of "mainMemory")
 // can be controlled by one of:

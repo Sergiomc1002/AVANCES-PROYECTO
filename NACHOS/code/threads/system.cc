@@ -35,6 +35,7 @@ SynchDisk   *synchDisk;
 #ifdef USER_PROGRAM	// requires either FILESYS or FILESYS_STUB
 Machine *machine;	// user program memory and registers
 BitMap * memoryMap;
+NachosOpenFilesTable* open_files_table;
 #endif
 
 #ifdef NETWORK
@@ -132,6 +133,7 @@ Initialize(int argc, char **argv)
 	}
 #ifdef USER_PROGRAM
 	memoryMap = new BitMap(32);
+	open_files_table = new NachosOpenFilesTable();
 	if (!strcmp(*argv, "-s"))
 	    debugUserProg = true;
 #endif
