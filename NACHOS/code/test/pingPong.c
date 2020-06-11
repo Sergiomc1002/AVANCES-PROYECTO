@@ -2,8 +2,7 @@
 
 void SimpleThread(int);
 
-int
-main( int argc, char * argv[] ) {
+int main( int argc, char * argv[] ) {
 
     Fork(SimpleThread);
     SimpleThread(1);
@@ -16,7 +15,7 @@ main( int argc, char * argv[] ) {
 
 void SimpleThread(int num)
 {
-
+    Write("ST\n", 3, 1);
     if (num == 1) {
 	for (num = 0; num < 5; num++) {
 		Write("Hola 1\n", 7, 1);

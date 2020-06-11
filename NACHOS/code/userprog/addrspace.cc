@@ -20,6 +20,7 @@
 #include "addrspace.h"
 #include "noff.h"
 
+
 //----------------------------------------------------------------------
 // SwapHeader
 // 	Do little endian to big endian conversion on the bytes in the 
@@ -56,9 +57,52 @@ SwapHeader (NoffHeader *noffH)
 //
 //	"executable" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
+AddrSpace::AddrSpace(AddrSpace * father)
+{
+	this->numPages = father->GetNumPages();
+	pageTable = new TranslationEntry[this->numPages];
+	TranslationEntry * fatherTable = father->GetPageTable();
+	this->uninitDataSize = father->GetUninitSize();
+	this->dataSize = father->GetDataSize();
+	this->textSize = father->GetTextSize();
+	
+	//int fatherPages = divRoundUp(this->dataSize + this->textSize , PageSize );
+	int fatherPages = father->numPages - divRoundUp(UserStackSize, PageSize);
 
+	int i;
+    for (i = 0; i < fatherPages ; i++) {
+		pageTable[i].virtualPage = i;
+		pageTable[i].physicalPage = fatherTable[i].physicalPage;
+		pageTable[i].valid = fatherTable[i].valid;
+		pageTable[i].use = fatherTable[i].use;
+		pageTable[i].dirty = fatherTable[i].dirty;
+		pageTable[i].readOnly = fatherTable[i].readOnly;
+    }
+
+	for( ; i < this->numPages; ++i) {
+		pageTable[i].virtualPage = i;
+		pageTable[i].physicalPage = memoryMap->Find();
+		pageTable[i].valid = true;
+		pageTable[i].use = false;
+		pageTable[i].dirty = false;
+		pageTable[i].readOnly = false;
+	}	
+}
+int AddrSpace::GetUninitSize(){
+	return uninitDataSize;
+}
+int AddrSpace::GetDataSize(){
+	return dataSize;
+}
+int AddrSpace::GetTextSize(){
+	return textSize;
+}
+TranslationEntry * AddrSpace::GetPageTable(){
+	return pageTable;	
+}
 AddrSpace::AddrSpace(OpenFile *executable)
 {
+	this->imFather = true;
     NoffHeader noffH;
     unsigned int i, size;
 
@@ -69,12 +113,12 @@ AddrSpace::AddrSpace(OpenFile *executable)
     ASSERT(noffH.noffMagic == NOFFMAGIC);
 
 // how big is address space?
+	uninitDataSize = noffH.uninitData.size;
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
 			+ UserStackSize;	// we need to increase the size
 						// to leave room for the stack
-	
-	printf("tamaño texto : %d - tamalo dato : %d - tamaño dato sin inicializar : %d - tamaño pila : %d\n", noffH.code.size, noffH.initData.size, noffH.uninitData.size, UserStackSize); 					
-	
+	this->dataSize = noffH.initData.size;
+	this->textSize = noffH.code.size;
     numPages = divRoundUp(size, PageSize);
     size = numPages * PageSize;
 
@@ -89,17 +133,15 @@ AddrSpace::AddrSpace(OpenFile *executable)
 	memoryMap->Mark(0);
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
-	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-								//siento que a memoryMap le tiene que entrar la pagina. 
-	pageTable[i].physicalPage = memoryMap->Find();//yo creo que esto deberia evaluar la pagina, si es de texto o datos puede ya existir, entonces,deme esa pos. 
-	pageTable[i].valid = true;						//si es datos no inicializados o pila, si tiene que buscar un campo libre en la memoria para el nuevo
-	pageTable[i].use = false;						//hilo, esto tmbn afecta el for de abajo, ya que si la pag ya existe en memoria, no hay que moverla. 
-	pageTable[i].dirty = false;						//entonces memoyMap me da una pos, de algo que ya existe en memoria, o en donde va a existir. 
-	pageTable[i].readOnly = false;  // if the code segment was entirely on 
+		pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
+		pageTable[i].physicalPage = memoryMap->Find();
+		pageTable[i].valid = true;
+		pageTable[i].use = false;
+		pageTable[i].dirty = false;
+		pageTable[i].readOnly = false;  // if the code segment was entirely on 
 					// a separate page, we could set its 
 					// pages to be read-only
     }
-    
     
 // zero out the entire address space, to zero the unitialized data segment 
 // and the stack segment
@@ -133,10 +175,22 @@ AddrSpace::AddrSpace(OpenFile *executable)
 // AddrSpace::~AddrSpace
 // 	Dealloate an address space.  Nothing for now!
 //----------------------------------------------------------------------
-
+int AddrSpace::GetNumPages(){
+	return numPages;
+}
 AddrSpace::~AddrSpace()
 {
-	
+	if(this->imFather){
+		for(int i = 0; i < this->numPages; ++i){
+			memoryMap->Clear(i);
+		}
+	}
+	else{
+		int fatherPages = divRoundUp(this->dataSize + this->textSize , PageSize );
+		for(int i = fatherPages; i < this->numPages; ++i){
+			memoryMap->Clear(i);
+		}
+	}
 	
 	//se tiene que limpiar la memoria de machine->mainMemory. SOLAMENTE SI NO HAY otro hilo utilizando los mismo datos
 	//lo que si hay que eliminar para todos es la pila. 

@@ -220,12 +220,63 @@ void NachOS_Close() {		// System call 8
 }
 
 
+void NachosForkThread( int p );
+
 /*
  *  System call interface: void Fork( void (*func)() )
  */
 void NachOS_Fork() {		// System call 9
+   //DEBUG( 'u', "Entering Fork System call\n" );
+	// We need to create a new kernel thread to execute the user thread
+	//Thread * newT = new Thread( "child to execute Fork code" );
+
+	// We need to share the Open File Table structure with this new child
+
+	// Child and father will also share the same address space, except for the stack
+	// Text, init data and uninit data are shared, a new stack area must be created
+	// for the new child
+	// We suggest the use of a new constructor in AddrSpace class,
+	// This new constructor will copy the shared segments (space variable) from currentThread, passed
+	// as a parameter, and create a new stack for the new child
+	//newT->space = new AddrSpace( currentThread->space );
+
+	// We (kernel)-Fork to a new method to execute the child code
+	// Pass the user routine address, now in register 4, as a parameter
+	// Note: in 64 bits register 4 need to be casted to (void *)
+	//newT->Fork( NachosForkThread, machine->ReadRegister( 4 ) );
+
+	//returnFromSystemCall();	// This adjust the PrevPC, PC, and NextPC registers
+
+	//DEBUG( 'u', "Exiting Fork System call\n" );
+	// Kernel_Fork
+   DEBUG('u', "Nachos Fork\n");
+   Thread * newT = new Thread("Child");
+   newT->space = new AddrSpace( currentThread->space );
+   newT->Fork((VoidFunctionPtr)NachosForkThread, (void*)(machine->ReadRegister(4)));
+   returnFromSystemCall();
+
 }
 
+void NachosForkThread( int p ) { // for 32 bits version
+// void NachosForkThread( void * p ) { // for 64 bits version
+    //printf("NachosForkThread\n");
+    AddrSpace *space;
+
+    space = currentThread->space;
+    space->InitRegisters();             // set the initial register values
+    space->RestoreState();              // load page table register
+
+// Set the return address for this thread to the same as the main thread
+// This will lead this thread to call the exit system call and finish
+    machine->WriteRegister( RetAddrReg, 4 );
+
+    machine->WriteRegister( PCReg, (long) p );
+    machine->WriteRegister( NextPCReg, (long) p + 4 );
+
+    machine->Run();                     // jump to the user progam
+    ASSERT(false);
+
+}
 
 /*
  *  System call interface: void Yield()
