@@ -54,6 +54,7 @@ void NachOS_Exit() {		// System call 1
 	
 	//devolver los de addrespace: colocar las paginas como libres
 	
+	currentThread->space->~AddrSpace(); //aqui ya se toma en cuenta si es hilo o proceso. 
 	
 	
 	//Caso especial, que el que haga exit sea un hilo.
@@ -63,8 +64,8 @@ void NachOS_Exit() {		// System call 1
 	//debe devolver un valor al join, si algun otro proceso espera por mi. 
 	
 	
-	//currentThread->Finish()
-	
+	 currentThread->Finish(); 
+	//hay que retornar el return_value, creo. 
 }
 
 
