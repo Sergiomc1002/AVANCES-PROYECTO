@@ -88,6 +88,8 @@ AddrSpace::AddrSpace(AddrSpace * father)
 		pageTable[i].readOnly = false;
 	}	
 }
+
+
 int AddrSpace::GetUninitSize(){
 	return uninitDataSize;
 }

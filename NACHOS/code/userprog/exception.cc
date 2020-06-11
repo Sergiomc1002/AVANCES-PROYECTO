@@ -53,6 +53,9 @@ void NachOS_Halt() {		// System call 0
 void NachOS_Exit() {		// System call 1
 	
 	//devolver los de addrespace: colocar las paginas como libres
+	
+	
+	
 	//Caso especial, que el que haga exit sea un hilo.
 	//los hilos comparte Text, Data.
 	//lo unico que hay que devolver es la pila. 
@@ -220,49 +223,15 @@ void NachOS_Close() {		// System call 8
 }
 
 
-void NachosForkThread( int p );
-
-/*
- *  System call interface: void Fork( void (*func)() )
- */
-void NachOS_Fork() {		// System call 9
-   //DEBUG( 'u', "Entering Fork System call\n" );
-	// We need to create a new kernel thread to execute the user thread
-	//Thread * newT = new Thread( "child to execute Fork code" );
-
-	// We need to share the Open File Table structure with this new child
-
-	// Child and father will also share the same address space, except for the stack
-	// Text, init data and uninit data are shared, a new stack area must be created
-	// for the new child
-	// We suggest the use of a new constructor in AddrSpace class,
-	// This new constructor will copy the shared segments (space variable) from currentThread, passed
-	// as a parameter, and create a new stack for the new child
-	//newT->space = new AddrSpace( currentThread->space );
-
-	// We (kernel)-Fork to a new method to execute the child code
-	// Pass the user routine address, now in register 4, as a parameter
-	// Note: in 64 bits register 4 need to be casted to (void *)
-	//newT->Fork( NachosForkThread, machine->ReadRegister( 4 ) );
-
-	//returnFromSystemCall();	// This adjust the PrevPC, PC, and NextPC registers
-
-	//DEBUG( 'u', "Exiting Fork System call\n" );
-	// Kernel_Fork
-   DEBUG('u', "Nachos Fork\n");
-   Thread * newT = new Thread("Child");
-   newT->space = new AddrSpace( currentThread->space );
-   newT->Fork((VoidFunctionPtr)NachosForkThread, (void*)(machine->ReadRegister(4)));
-   returnFromSystemCall();
-
-}
-
-void NachosForkThread( int p ) { // for 32 bits version
-// void NachosForkThread( void * p ) { // for 64 bits version
+//void NachosForkThread( int p ) { // for 32 bits version
+ void NachosForkThread( void * p ) { // for 64 bits version
     //printf("NachosForkThread\n");
+    
+    printf("ESTOY EN NACHOS_FORK_THREAD\n"); 
+    
     AddrSpace *space;
 
-    space = currentThread->space;
+    space= currentThread->space;
     space->InitRegisters();             // set the initial register values
     space->RestoreState();              // load page table register
 
@@ -277,6 +246,27 @@ void NachosForkThread( int p ) { // for 32 bits version
     ASSERT(false);
 
 }
+
+/*
+ *  System call interface: void Fork( void (*func)() )
+ */
+void NachOS_Fork() {		// System call 9
+   
+   
+   DEBUG( 'u', "Entering Fork System call\n" );
+   printf("ESTOY EN NACHOS_FORK()\n "); 
+   
+   Thread * newT = new Thread("Child");
+      
+	newT->space = new AddrSpace( currentThread->space );
+	
+	printf("leyendo el registro 4 : %d \n", machine->ReadRegister(4)); 
+	
+   newT->Fork((VoidFunctionPtr)NachosForkThread, (void*)machine->ReadRegister(4));
+   
+   printf("SALIENDO DE NACHOS_FORK()\n");
+}
+
 
 /*
  *  System call interface: void Yield()
@@ -559,7 +549,7 @@ ExceptionHandler(ExceptionType which)
                 ASSERT( false );
                 break;
           }
-          returnFromSystemCall();
+         returnFromSystemCall();
           break;
 
        case PageFaultException: {

@@ -99,6 +99,10 @@ class Thread {
     const char* getName() { return (name); }
     void Print() { printf("%s, ", name); }
 
+	#ifdef USER_PROGRAM
+		AddrSpace *space;			// User code this thread is running.
+	#endif
+	
   private:
     // some of the private data for this class is listed above
     
@@ -123,7 +127,7 @@ class Thread {
     void SaveUserState();		// save user-level register state
     void RestoreUserState();		// restore user-level register state
 
-    AddrSpace *space;			// User code this thread is running.
+    //AddrSpace *space;			// User code this thread is running.
 #endif
 };
 

@@ -84,9 +84,14 @@ Thread::~Thread()
 //	"arg" is a single argument to be passed to the procedure.
 //----------------------------------------------------------------------
 
+
+
 void 
 Thread::Fork(VoidFunctionPtr func, void* arg)
 {
+	
+	printf("ESTOY EN FORK-thread.cc\n"); 
+	
 #ifdef HOST_x86_64
     DEBUG('t', "Forking thread \"%s\" with func = 0x%lx, arg = %ld\n",
 	  name, (HostMemoryAddress) func, arg);
@@ -102,6 +107,8 @@ Thread::Fork(VoidFunctionPtr func, void* arg)
     scheduler->ReadyToRun(this);	// ReadyToRun assumes that interrupts 
 					// are disabled!
     interrupt->SetLevel(oldLevel);
+
+	printf("SALIENDO DE FORK-thread.cc\n");
 }    
 
 //----------------------------------------------------------------------
