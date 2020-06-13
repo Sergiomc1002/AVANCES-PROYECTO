@@ -75,41 +75,52 @@ void NachOS_Exit() {		// System call 1
 /*
  *  System call interface: SpaceId Exec( char * )
  */
+ 
+ //quien le manda el char* ??
 void NachOS_Exec() {		// System call 2
+	
+	int data = machine->ReadRegister(4);			//yo se que es un char*
+	
+	int* buffer = (int*)calloc(1, sizeof(int)); 
+	
+	int data_capacity = 100; 
+	char* all_data = (char*)calloc(data_capacity, sizeof(char)); 
+	int index_all_data = 0; 
+	
+	machine->ReadMem(data, 1, buffer);
+	
+	char c_data[1]; 
+	c_data[0] = *(char*)buffer;
+
+	 
+	while(c_data != '\0' && index_all_data < data_capacity) {
+		all_data[index_all_data] = c_data[0]; 
+		
+		++data; 
+		++index_all_data; 
+		machine->ReadMem(data, 1, buffer); 
+		c_data[0] = *(char*)buffer; 
+	} 
+
+	if (c_data == '\0' && index_all_data < data_capacity) {	//se pudo leer todo en el buffer de capacidad :  "data_capacity"
+		all_data[index_all_data] = c_data[0]; 
+		OpenFile * executable = fileSystem->Open(all_data); 
+		AddrSpace * addr_space = new AddrSpace(executable);
+		currentThread->space = addr_space; 
+		addr_space->InitRegisters(); 
+		addr_space->RestoreState(); 
+		free(all_data);
+		free(c_data);
+		machine->Run();   
+	}
+	else {					//no hay suficiente espacio. 
+		printf("no se pudo realizar exec por falta de memoria\n"); 
+	}
 
 
-
+//se supone que EXEC le tiene que pasar el id, a Join, pero no entiendo porque. no tiene mucho sentido creo. 
 }
 
- 
- /*
-  *     else if((which == SyscallException) && (type == syscall_Join)){
-        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
-        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
-        
-        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
-        
-        int pid = machine->ReadRegister(4);
-        if(currentThread->Child_Status[pid]==-1){
-          machine->WriteRegister(2,-1);
-        }
-        else if(currentThread->Child_Status[pid]==0){
-          machine->WriteRegister(2,currentThread->Child_ReturnValues[pid]);
-        }
-        else{
-          currentThread->WaitingFor=pid;
-          WaitingQueue->SortedInsert((void *)currentThread, pid); // Insert currentthread to waiting queue as child not yet terminated.
-          IntStatus oldlevel=interrupt->SetLevel(IntOff);
-          currentThread->PutThreadToSleep();
-          interrupt->SetLevel(oldlevel); 
-        }
-
-}
-  * 
-  * 
-  * */
- 
- 
  
  
 /*
@@ -363,6 +374,7 @@ The exact behavior of this function depends on the implementation, in particular
  *  System call interface: void Yield()
  */
 void NachOS_Yield() {		// System call 10
+	currentThread->Yield(); 					//creo que solo es hacer esto. 
 }
 
 
@@ -370,6 +382,7 @@ void NachOS_Yield() {		// System call 10
  *  System call interface: Sem_t SemCreate( int )
  */
 void NachOS_SemCreate() {		// System call 11
+
 }
 
 
