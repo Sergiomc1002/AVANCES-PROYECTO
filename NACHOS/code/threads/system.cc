@@ -9,6 +9,8 @@
 #include "system.h"
 #include "preemptive.h"
 
+
+
 // This defines *all* of the global data structures used by Nachos.
 // These are all initialized and de-allocated by this file.
 
@@ -19,7 +21,12 @@ Interrupt *interrupt;			// interrupt status
 Statistics *stats;			// performance metrics
 Timer *timer;				// the hardware timer device,
 					// for invoking context switches
-					
+
+
+
+
+//int count_threads = 0; 
+	
 // 2007, Jose Miguel Santos Espino
 PreemptiveScheduler* preemptiveScheduler = NULL;
 const long long DEFAULT_TIME_SLICE = 50000;
@@ -35,6 +42,9 @@ SynchDisk   *synchDisk;
 #ifdef USER_PROGRAM	// requires either FILESYS or FILESYS_STUB
 Machine *machine;	// user program memory and registers
 BitMap * memoryMap;
+List<father_son_t*>* waiting_list; 
+//Semaphore *semaphore; 
+//extern List<Semaphore*> *process_threads; 
 //NachosOpenFilesTable* open_files_table;
 #endif
 
@@ -133,6 +143,9 @@ Initialize(int argc, char **argv)
 	}
 #ifdef USER_PROGRAM
 	memoryMap = new BitMap(32);
+	waiting_list = new List<father_son_t*>(); 
+	//semaphore = new Semaphore("sema", 0); 
+	//process_threads = new List<Semaphore*>(); 
 	//open_files_table = new NachosOpenFilesTable();
 	if (!strcmp(*argv, "-s"))
 	    debugUserProg = true;

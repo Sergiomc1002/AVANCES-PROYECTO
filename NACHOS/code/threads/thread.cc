@@ -32,11 +32,27 @@ const unsigned STACK_FENCEPOST = 0xdeadbeef;
 //	"threadName" is an arbitrary string, useful for debugging.
 //----------------------------------------------------------------------
 
+int count_threads = 0; 
+
+
 Thread::Thread(const char* threadName)
 {
     name = threadName;
     stackTop = NULL;
     stack = NULL;
+    
+    if (count_threads == 0) {
+		++count_threads; 
+		this->pid = count_threads;
+		this->father_pid = -1; 		//soy el primero, no tengo padre.  
+		++count_threads;
+	}
+	else {
+		this->pid = count_threads; 
+		++count_threads; 
+		this->father_pid = currentThread->get_pid(); 
+	}
+	
     status = JUST_CREATED;
 #ifdef USER_PROGRAM
     space = NULL;
@@ -83,6 +99,11 @@ Thread::~Thread()
 //	"func" is the procedure to run concurrently.
 //	"arg" is a single argument to be passed to the procedure.
 //----------------------------------------------------------------------
+
+
+int Thread::get_pid() {
+	return this->pid; 
+}
 
 
 

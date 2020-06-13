@@ -16,6 +16,10 @@
 #include "stats.h"
 #include "timer.h"
 
+typedef struct {
+	int father_pid; 
+	int son_pid; 
+}father_son_t; 
 
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); 	// Initialization,
@@ -36,6 +40,10 @@ extern Timer *timer;				// the hardware alarm clock
 //#include "nachostabla.h"
 extern Machine* machine;	// user program memory and registers
 extern BitMap * memoryMap;
+extern List<father_son_t*>* waiting_list;
+//extern Semaphore* semaphore; 
+//extern Semaphore semaphore; 
+//extern List<Semaphore*> *process_threads; 
 //extern NachosOpenFilesTable* open_files_table; 
 #endif
 

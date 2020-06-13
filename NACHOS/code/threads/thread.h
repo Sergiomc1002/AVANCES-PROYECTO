@@ -99,6 +99,10 @@ class Thread {
     const char* getName() { return (name); }
     void Print() { printf("%s, ", name); }
 
+
+	int get_pid(); 
+	
+
 	#ifdef USER_PROGRAM
 		AddrSpace *space;			// User code this thread is running.
 	#endif
@@ -111,6 +115,9 @@ class Thread {
 					// (If NULL, don't deallocate stack)
     ThreadStatus status;		// ready, running or blocked
     const char* name;
+
+	int pid;
+	int father_pid; 
 
     void StackAllocate(VoidFunctionPtr func, void* arg);
     					// Allocate a stack for thread.

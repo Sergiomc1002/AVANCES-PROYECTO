@@ -63,6 +63,9 @@ void NachOS_Exit() {		// System call 1
 	
 	//debe devolver un valor al join, si algun otro proceso espera por mi. 
 	
+	//tengo que hacerle signal al semaforo de mi padre, si esta esperandome. para esto se usa la lista "waiting_list". hay tuplas de PADRE-HIJO.
+	//el semaphore lo tiene tanto el padre como el hijo, si se incluye en en addrspace, o se crea una lista de semaphores en el system.h y se saca de ahi. 
+	
 	
 	 currentThread->Finish(); 
 	//hay que retornar el return_value, creo. 
@@ -73,13 +76,89 @@ void NachOS_Exit() {		// System call 1
  *  System call interface: SpaceId Exec( char * )
  */
 void NachOS_Exec() {		// System call 2
+
+
+
 }
 
+ 
+ /*
+  *     else if((which == SyscallException) && (type == syscall_Join)){
+        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+        
+        int pid = machine->ReadRegister(4);
+        if(currentThread->Child_Status[pid]==-1){
+          machine->WriteRegister(2,-1);
+        }
+        else if(currentThread->Child_Status[pid]==0){
+          machine->WriteRegister(2,currentThread->Child_ReturnValues[pid]);
+        }
+        else{
+          currentThread->WaitingFor=pid;
+          WaitingQueue->SortedInsert((void *)currentThread, pid); // Insert currentthread to waiting queue as child not yet terminated.
+          IntStatus oldlevel=interrupt->SetLevel(IntOff);
+          currentThread->PutThreadToSleep();
+          interrupt->SetLevel(oldlevel); 
+        }
 
+}
+  * 
+  * 
+  * */
+ 
+ 
+ 
+ 
 /*
  *  System call interface: int Join( SpaceId )
  */
+  
+/*
+ * 
+ * Francisco Arroyo:
+En el "Join" tenemos la información de los dos hilos, como usted indica, "currentThread" que es el proceso padre P y en registro 4 el hilo por el 
+* que debo esperar H.  Entonces en el momento que el proceso llama a "Join" debe crear una estructura de datos para almacenar 
+* esta relación "P espera por H", luego el proceso P debe esperar por un semáforo, por ejemplo.
+
+Cuando el proceso H termine, llamando a "Exit" verifica la estructura de datos para comprobar si hay alguno esperando por él y, 
+* en caso positivo, le hace "Signal" al semáforo para que el otro proceso P puede seguir su ejecución.  Recuerde también que "Exit" 
+* recibe un parámetro que se debe entregar al proceso P como retorno del "Join".
+
+Le llega lo que usted devuelva en "Exec".
+
+Recuerdo que NO es buena idea pasar punteros de estructuras a los programas de usuario, entonces sería recomendable que "Exec" devuelva un número, 
+* por ejemplo, un índice de una tabla de los procesos que hacen "Join". 
+ * */
+
+
+
+
 void NachOS_Join() {		// System call 3
+
+int  child_pid = machine->ReadRegister(4); 
+
+int my_pid = currentThread->get_pid(); 
+
+father_son_t* father_son = (father_son_t*)calloc(1,sizeof(father_son_t)); 
+father_son->son_pid =  child_pid; 
+father_son->father_pid = my_pid; 
+
+waiting_list->Append(father_son); 
+
+//ESTO SE PODRIA PODER EN FORK, pero entonces se supondria que va a esperar a alguien aunque nunca haga join, no afecta en nada, pero no es asi.  
+//le digo a mi semaforo, que voy a tener que esperar"Join" por un hijo mas. 
+//currentThread->space->semaphore->setValue(currentThread->space->semaphore->getValue()-1);	//cada que creo un hijo, decremento el semaphore, para esperarlo.  
+
+//printf("id del padre : %d - id del hijo : %d \n", my_pid, child_pid); 
+
+
+//currentThread->semaphore->P();			esperar a que todos los hijos me hagan signal. 
+
+
+
 }
 
 
@@ -226,8 +305,7 @@ void NachOS_Close() {		// System call 8
 
 //void NachosForkThread( int p ) { // for 32 bits version
  void NachosForkThread( void * p ) { // for 64 bits version
-    //printf("NachosForkThread\n");
-    
+    //printf("NachosForkThread\n");    
     printf("ESTOY EN NACHOS_FORK_THREAD\n"); 
     
     AddrSpace *space;
@@ -244,8 +322,9 @@ void NachOS_Close() {		// System call 8
     machine->WriteRegister( NextPCReg, (long) p + 4 );
 
     machine->Run();                     // jump to the user progam
-    ASSERT(false);
 
+    printf("SALIENDO DE NACHOS_FORK_THREAD\n");    
+    ASSERT(false);
 }
 
 /*
@@ -266,8 +345,19 @@ void NachOS_Fork() {		// System call 9
    newT->Fork((VoidFunctionPtr)NachosForkThread, (void*)machine->ReadRegister(4));
    
    printf("SALIENDO DE NACHOS_FORK()\n");
+   
+   //machine->WriteRegister(2,newT->get_pid());	//pasarle al padre el id del hijo. 
+ 
 }
 
+
+
+/*
+The exact behavior of this function depends on the implementation, in particular on the mechanics of the OS scheduler in use and the
+*  state of the system. For example, a first-in-first-out realtime scheduler (SCHED_FIFO in Linux) would suspend the current thread 
+* and put it on the back of the queue of the same-priority threads that are ready to run (and if there are no other threads at the same priority,
+*  yield has no effect). 
+*/
 
 /*
  *  System call interface: void Yield()

@@ -17,7 +17,6 @@
 #include "filesys.h"
 //#include "bitmap.h"
 
-
 #define UserStackSize		1024 	// increase this as necessary!
 
 class AddrSpace {
@@ -37,6 +36,10 @@ class AddrSpace {
 	int GetUninitSize();
 	int GetDataSize();
 	int GetTextSize();
+	//Semaphore* get_semaphore(); 
+	
+	public:
+	//Semaphore* semaphore; 
 	
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation
@@ -45,6 +48,9 @@ class AddrSpace {
 	int textSize;
 	bool imFather = false;
 					// for now!
+	
+	
+
     unsigned int numPages;		// Number of pages in the virtual 
 					// address space
 };
