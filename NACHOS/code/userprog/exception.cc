@@ -120,7 +120,7 @@ void NachOS_Exit() {		// System call 1
 	ThreadStatus exitStatus = (ThreadStatus)machine->ReadRegister(4);
 	int threadId = currentThread->get_pid();
 
-	printf("saliendo : id : %d \n", currentThread->get_pid()); 
+	printf("soy el hilo/proceso : %d y estoy saliendo \n", currentThread->get_pid()); 
 	
 	if (!currentThread->space->am_I_process()) {			//si no soy un proceso, soy un hilo. 
 		ListElement<father_son_t*>* c_node = waiting_list->head(); 
@@ -241,12 +241,6 @@ my_sem->setValue(my_sem->getValue()-1);			//el semaforo al crearse tiene 1 de va
 printf("soy el hilo : %s - entrando al semaforo\n", my_sem->getName()); 
 
 my_sem->P(); 									//voy a esperar y me tengo que quedar en el semaforo, hasta que alguien me haga signal. 
-
-
-
-//currentThread->semaphore->P();			esperar a que todos los hijos me hagan signal. 
-
-
 
 }
 
@@ -395,7 +389,7 @@ void NachOS_Close() {		// System call 8
 //void NachosForkThread( int p ) { // for 32 bits version
  void NachosForkThread( void * p ) { // for 64 bits version
     //printf("NachosForkThread\n");    
-    printf("ESTOY EN NACHOS_FORK_THREAD\n"); 
+    //printf("ESTOY EN NACHOS_FORK_THREAD\n"); 
     
     AddrSpace *space;
 
@@ -412,7 +406,7 @@ void NachOS_Close() {		// System call 8
 
     machine->Run();                     // jump to the user progam
 
-    printf("SALIENDO DE NACHOS_FORK_THREAD\n");    
+    //printf("SALIENDO DE NACHOS_FORK_THREAD\n");    
     ASSERT(false);
 }
 
@@ -423,14 +417,11 @@ void NachOS_Fork() {		// System call 9
    
    
    DEBUG( 'u', "Entering Fork System call\n" );
-   printf("ESTOY EN NACHOS_FORK()\n "); 
+   //printf("ESTOY EN NACHOS_FORK()\n "); 
    
    int id = currentThread->get_pid();
-   printf("ID: %d \n",id);
    char * myId = (char *)calloc(20,sizeof(char));
    sprintf(myId,"%d",id);
-   
-	printf("MYID: %s \n", myId);
    Semaphore * sem = new Semaphore(myId,1);	//cada proceso/hilo que ejecuta fork, va a necesitar un semaforo, se usa solo si hace join. 
    
    process_threads->Append(sem); 			//lista de semaforos, cada semaforo tiene de nombre el mismo id del hilo. 
@@ -439,11 +430,9 @@ void NachOS_Fork() {		// System call 9
       
 	newT->space = new AddrSpace( currentThread->space );
 	
-	printf("leyendo el registro 4 : %d \n", machine->ReadRegister(4)); 
-	
    newT->Fork((VoidFunctionPtr)NachosForkThread, (void*)machine->ReadRegister(4));
    
-   printf("SALIENDO DE NACHOS_FORK()\n");
+   //printf("SALIENDO DE NACHOS_FORK()\n");
    
    //machine->WriteRegister(2,newT->get_pid());	//pasarle al padre el id del hijo. 
  

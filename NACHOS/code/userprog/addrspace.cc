@@ -105,6 +105,7 @@ AddrSpace::AddrSpace(AddrSpace * father)
 		pageTable[i].readOnly = false;
 	}	
 
+	//se implemento de otra manera.
 	//this->semaphore = father->get_semaphore(); 			//los hijos tienen que tener el semaforo del padre, para poder hacerle Signal al terminar. 
 	
 }
@@ -126,7 +127,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
 {
 	
 
-	
+	//SE IMPLEMENTO DE OTRA MANERA. 
 	//Semaphore* semaphore = new Semaphore("", 0); 
 	//process_threads->Append(semaphore); 
 
@@ -217,13 +218,11 @@ int AddrSpace::GetNumPages(){
 
 void AddrSpace:: deleteAddrspace(){
 	if(this->imProcess){
-		printf("DELETEADDR 1");
 		for(int i = 0; i < this->numPages; ++i){
 			memoryMap->Clear(i);
 		}
 	}
 	else{
-		printf("DELETEADDR 1");
 		int fatherPages = divRoundUp(this->dataSize + this->textSize , PageSize );
 		for(int i = fatherPages; i < this->numPages; ++i){
 			memoryMap->Clear(i);
@@ -238,7 +237,7 @@ void AddrSpace:: deleteAddrspace(){
    delete pageTable;
 }
 
-AddrSpace::~AddrSpace()
+AddrSpace::~AddrSpace()		//LO REALIZA deleteAddrspace().
 {
 	// if(this->imFather){
 		// for(int i = 0; i < this->numPages; ++i){

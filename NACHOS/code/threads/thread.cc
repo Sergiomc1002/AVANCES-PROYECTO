@@ -117,7 +117,7 @@ void
 Thread::Fork(VoidFunctionPtr func, void* arg)
 {
 	
-	printf("ESTOY EN FORK-thread.cc\n"); 
+	//printf("ESTOY EN FORK-thread.cc\n"); 
 	
 #ifdef HOST_x86_64
     DEBUG('t', "Forking thread \"%s\" with func = 0x%lx, arg = %ld\n",
@@ -135,7 +135,7 @@ Thread::Fork(VoidFunctionPtr func, void* arg)
 					// are disabled!
     interrupt->SetLevel(oldLevel);
 
-	printf("SALIENDO DE FORK-thread.cc\n");
+	//printf("SALIENDO DE FORK-thread.cc\n");
 }    
 
 //----------------------------------------------------------------------
