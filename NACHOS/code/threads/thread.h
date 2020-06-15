@@ -111,10 +111,12 @@ class Thread {
 
 	#ifdef USER_PROGRAM
 		AddrSpace *space;			// User code this thread is running.
+		//Semaphore * my_sem; 
 	#endif
 	
   private:
     // some of the private data for this class is listed above
+    
     
     HostMemoryAddress* stack; 		// Bottom of the stack 
 					// NULL if this is the main thread

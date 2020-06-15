@@ -61,6 +61,12 @@ SwapHeader (NoffHeader *noffH)
 //----------------------------------------------------------------------
 
 
+
+bool AddrSpace::am_I_process() {
+	return this->imProcess; 
+}
+
+
 /*
 Semaphore* AddrSpace::get_semaphore() {
 	return this->semaphore; 
@@ -132,7 +138,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
 	*/
 	
 	
-	this->imFather = true;
+	this->imProcess = true;
     NoffHeader noffH;
     unsigned int i, size;
 
@@ -210,7 +216,7 @@ int AddrSpace::GetNumPages(){
 }
 
 void AddrSpace:: deleteAddrspace(){
-	if(this->imFather){
+	if(this->imProcess){
 		printf("DELETEADDR 1");
 		for(int i = 0; i < this->numPages; ++i){
 			memoryMap->Clear(i);

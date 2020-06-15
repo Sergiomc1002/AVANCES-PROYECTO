@@ -49,28 +49,99 @@ void NachOS_Halt() {		// System call 0
 }
 
 
+
+Semaphore* find_my_sem(ListElement<Semaphore*>* head, int my_id) {
+	char* id = (char*)calloc(20, sizeof(char));
+	sprintf(id,"%d",my_id); 
+	
+	ListElement<Semaphore*>* c_node = head; 
+	
+	Semaphore* my_sem = NULL;  
+	
+	bool found = false; 
+	while (c_node != NULL && !found) {
+		Semaphore* sem = c_node->item; 
+		char* c_name = sem->getName(); 
+		if (strcmp(id, c_name) == 0) {
+			found = true; 
+			my_sem = sem; 
+		}
+		else {
+			c_node = c_node->next; 
+		}
+	}
+	
+	return my_sem; 
+}
+
+
+int is_someone_waiting_for_me(ListElement<father_son_t*>* head, int my_id) {	//averigua si alguien espera, de ser vrdd, retorna el id de quien espera. 
+	int who = -1; 
+	
+	ListElement<father_son_t*>* c_node = head; 
+	
+	while (c_node != NULL && who == -1) {
+		father_son_t* c_tuple = c_node->item; 
+		if (my_id == c_tuple->son_pid) {
+			who = c_tuple->father_pid; 
+		}
+		else {
+			c_node = c_node->next; 
+		}
+	}
+
+	return who; 
+}
+
+
+
 /*
  *  System call interface: void Exit( int )
  */
-void NachOS_Exit() {		// System call 1
-	ThreadStatus exitStatus = (ThreadStatus)machine->ReadRegister(4);
-	int threadId = currentThread->get_pid();
-	printf("EXIT 1");
+
+
 	// BORRAR DEL BITMAP EL ADDRES SPACE DEL HILO
 	
     // CAMBIA EL ESTATUS DEL THREAD (SI DA 0, SE SALIO BIEN )
     // currentThread->setStatus(exitStatus);
 
     // SI EL PADRE DEL HILO ESTA DORMIDO, LO DESPIERTA
-    if((currentThread ->getParent()) != NULL && (currentThread->getParent()-> getStatus() == BLOCKED)){
+    //if((currentThread ->getParent()) != NULL && (currentThread->getParent()-> getStatus() == BLOCKED)){
 		//scheduler->ReadyToRun(currentThread->getParent()); //LE DICE AL SCHEDULER QUE DESPIERTE AL PADRE
 		
-    }
+    //}
+    
+    //tengo que buscar en waiting_list si yo estoy ahí, sacar al padre y hacerle signal.
+    //
+	
+
+
+void NachOS_Exit() {		// System call 1
+	ThreadStatus exitStatus = (ThreadStatus)machine->ReadRegister(4);
+	int threadId = currentThread->get_pid();
+
+	printf("saliendo : id : %d \n", currentThread->get_pid()); 
+	
+	if (!currentThread->space->am_I_process()) {			//si no soy un proceso, soy un hilo. 
+		ListElement<father_son_t*>* c_node = waiting_list->head(); 
+		int who = is_someone_waiting_for_me(c_node, currentThread->get_pid()); 
+		
+		if (-1 != who) {
+			printf("soy el hilo : %d y me esta esperando el hilo/proceso : %d \n", currentThread->get_pid(), who); 
+			printf("liberandolo ... \n"); 
+			Semaphore* sem = find_my_sem(process_threads->head(), who); 
+			sem->V(); 
+		}
+		else {
+			//nadie me esta esperando. 
+		}
+	}
+	else {													//por ser proceso, no tengo que esperar a nadie, ni siquiera busco. 
+		//nadie me puede esperar. 
+	}
 
     // FINALIZA EL THREAD
-	printf("EXIT 2");
 	currentThread->space->deleteAddrspace();
-	printf("EXIT 3");
 	currentThread->Finish();
 }
 
@@ -148,8 +219,6 @@ Recuerdo que NO es buena idea pasar punteros de estructuras a los programas de u
  * */
 
 
-
-
 void NachOS_Join() {		// System call 3
 
 int  child_pid = machine->ReadRegister(4); 
@@ -162,11 +231,17 @@ father_son->father_pid = my_pid;
 
 waiting_list->Append(father_son); 
 
-//ESTO SE PODRIA PODER EN FORK, pero entonces se supondria que va a esperar a alguien aunque nunca haga join, no afecta en nada, pero no es asi.  
-//le digo a mi semaforo, que voy a tener que esperar"Join" por un hijo mas. 
-//currentThread->space->semaphore->setValue(currentThread->space->semaphore->getValue()-1);	//cada que creo un hijo, decremento el semaphore, para esperarlo.  
+Semaphore* my_sem; 		//se lo puedo poner de atributo a thread asi lo accedo mas facil. 
+char* id = (char*)calloc(20, sizeof(char));
 
-//printf("id del padre : %d - id del hijo : %d \n", my_pid, child_pid); 
+ListElement<Semaphore*>* c_node = process_threads->head();  
+my_sem = find_my_sem(c_node, my_pid); 
+my_sem->setValue(my_sem->getValue()-1);			//el semaforo al crearse tiene 1 de valor, ahora quiero esperar 1 hilo, entonces lo decremento.  
+
+printf("soy el hilo : %s - entrando al semaforo\n", my_sem->getName()); 
+
+my_sem->P(); 									//voy a esperar y me tengo que quedar en el semaforo, hasta que alguien me haga signal. 
+
 
 
 //currentThread->semaphore->P();			esperar a que todos los hijos me hagan signal. 
@@ -350,14 +425,16 @@ void NachOS_Fork() {		// System call 9
    DEBUG( 'u', "Entering Fork System call\n" );
    printf("ESTOY EN NACHOS_FORK()\n "); 
    
-   //char * myId = (char *) calloc(10,sizeof(char));
    int id = currentThread->get_pid();
    printf("ID: %d \n",id);
    char * myId = (char *)calloc(20,sizeof(char));
    sprintf(myId,"%d",id);
    
 	printf("MYID: %s \n", myId);
-   Semaphore * sem = new Semaphore(myId,1);
+   Semaphore * sem = new Semaphore(myId,1);	//cada proceso/hilo que ejecuta fork, va a necesitar un semaforo, se usa solo si hace join. 
+   
+   process_threads->Append(sem); 			//lista de semaforos, cada semaforo tiene de nombre el mismo id del hilo. 
+   
    Thread * newT = new Thread("Child");
       
 	newT->space = new AddrSpace( currentThread->space );

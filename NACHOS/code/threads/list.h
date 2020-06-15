@@ -44,6 +44,8 @@ class List {
     List();			// initialize the list
     ~List();			// de-allocate the list
 
+    typedef ListElement<Item> ListNode;
+
     void Prepend(Item item); 	// Put item at the beginning of the list
     void Append(Item item); 	// Put item at the end of the list
     Item Remove(); 	 	// Take item off the front of the list
@@ -52,13 +54,14 @@ class List {
 
     bool IsEmpty();		// is the list empty? 
     
+	ListElement<Item>* head(); 
 
     // Routines to put/get items on/off list in order (sorted by key)
     void SortedInsert(Item item, int sortKey);	// Put item into list
     Item SortedRemove(int *keyPtr); 	  	// Remove first item from list
 
   private:
-    typedef ListElement<Item> ListNode;
+
     ListNode *first;  		// Head of the list, NULL if list is empty
     ListNode *last;		// Last element of list
 };
@@ -70,6 +73,12 @@ class List {
 //	"anItem" is the item to be put on the list.  
 //	"sortKey" is the priority of the item, if any.
 //----------------------------------------------------------------------
+
+
+template <class Item>
+ListElement<Item>* List<Item>::head() {
+	return this->first; 
+}
 
 template <class Item>
 ListElement<Item>::ListElement(Item anItem, int sortKey)

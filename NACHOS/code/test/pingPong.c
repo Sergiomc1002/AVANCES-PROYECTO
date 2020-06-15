@@ -19,7 +19,7 @@ int main( int argc, char * argv[] ) {
 
 	//int child_id = machine->ReadRegister(2); 
 
-	Join(7); 
+	Join(2); 
 
 
 	//Join(child_id); 		//primero se iria a dormir, y luego ejecutaria SimpleThread, por lo que el hijo deberia imprimir primero. 

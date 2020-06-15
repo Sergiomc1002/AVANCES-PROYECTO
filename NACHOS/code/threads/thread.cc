@@ -35,6 +35,8 @@ const unsigned STACK_FENCEPOST = 0xdeadbeef;
 int count_threads = 0; 
 
 
+//Semaphore* sem; 
+
 Thread::Thread(const char* threadName)
 {
     name = threadName;

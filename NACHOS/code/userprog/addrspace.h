@@ -38,6 +38,9 @@ class AddrSpace {
 	int GetTextSize();
 	//Semaphore* get_semaphore(); 
 	void deleteAddrspace();
+	
+	bool am_I_process(); 
+	
 	public:
 	//Semaphore* semaphore; 
 	
@@ -46,7 +49,7 @@ class AddrSpace {
 	int uninitDataSize;
 	int dataSize;
 	int textSize;
-	bool imFather = false;
+	bool imProcess = false;
 					// for now!
 	
 	
