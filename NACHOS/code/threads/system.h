@@ -37,13 +37,14 @@ extern Timer *timer;				// the hardware alarm clock
 #ifdef USER_PROGRAM
 #include "machine.h"
 #include "bitmap.h"
+#include "synch.h"
 //#include "nachostabla.h"
 extern Machine* machine;	// user program memory and registers
 extern BitMap * memoryMap;
 extern List<father_son_t*>* waiting_list;
 //extern Semaphore* semaphore; 
 //extern Semaphore semaphore; 
-//extern List<Semaphore*> *process_threads; 
+extern List<Semaphore*> *process_threads; 
 //extern NachosOpenFilesTable* open_files_table; 
 #endif
 

@@ -98,10 +98,16 @@ class Thread {
     void setStatus(ThreadStatus st) { status = st; }
     const char* getName() { return (name); }
     void Print() { printf("%s, ", name); }
-
+	
+	//DEVUELVE EL STATUS ACTUAL DEL THREAD
+	ThreadStatus getStatus(){
+		return this->status;
+	}
+	
+	
 
 	int get_pid(); 
-	
+	Thread * getParent();
 
 	#ifdef USER_PROGRAM
 		AddrSpace *space;			// User code this thread is running.
@@ -118,7 +124,7 @@ class Thread {
 
 	int pid;
 	int father_pid; 
-
+	Thread * father;
     void StackAllocate(VoidFunctionPtr func, void* arg);
     					// Allocate a stack for thread.
 					// Used internally by Fork()

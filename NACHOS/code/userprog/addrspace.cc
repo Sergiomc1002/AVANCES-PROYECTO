@@ -208,14 +208,16 @@ AddrSpace::AddrSpace(OpenFile *executable)
 int AddrSpace::GetNumPages(){
 	return numPages;
 }
-AddrSpace::~AddrSpace()
-{
+
+void AddrSpace:: deleteAddrspace(){
 	if(this->imFather){
+		printf("DELETEADDR 1");
 		for(int i = 0; i < this->numPages; ++i){
 			memoryMap->Clear(i);
 		}
 	}
 	else{
+		printf("DELETEADDR 1");
 		int fatherPages = divRoundUp(this->dataSize + this->textSize , PageSize );
 		for(int i = fatherPages; i < this->numPages; ++i){
 			memoryMap->Clear(i);
@@ -228,6 +230,28 @@ AddrSpace::~AddrSpace()
 	
 	//el pageTable si es individual de cada hilo, siempre se borra. 
    delete pageTable;
+}
+
+AddrSpace::~AddrSpace()
+{
+	// if(this->imFather){
+		// for(int i = 0; i < this->numPages; ++i){
+			// memoryMap->Clear(i);
+		// }
+	// }
+	// else{
+		// int fatherPages = divRoundUp(this->dataSize + this->textSize , PageSize );
+		// for(int i = fatherPages; i < this->numPages; ++i){
+			// memoryMap->Clear(i);
+		// }
+	// }
+	
+	//se tiene que limpiar la memoria de machine->mainMemory. SOLAMENTE SI NO HAY otro hilo utilizando los mismo datos
+	//lo que si hay que eliminar para todos es la pila. 
+	//la memoria solo se elimina si el hilo que esta terminando es el ultimo en utilizar ese espacio de memoria. 
+	
+	//el pageTable si es individual de cada hilo, siempre se borra. 
+   // delete pageTable;
 }
 
 //----------------------------------------------------------------------

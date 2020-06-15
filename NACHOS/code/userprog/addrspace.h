@@ -37,7 +37,7 @@ class AddrSpace {
 	int GetDataSize();
 	int GetTextSize();
 	//Semaphore* get_semaphore(); 
-	
+	void deleteAddrspace();
 	public:
 	//Semaphore* semaphore; 
 	

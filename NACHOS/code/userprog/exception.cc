@@ -24,6 +24,8 @@
 #include "copyright.h"
 #include "system.h"
 #include "syscall.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 
 
@@ -51,24 +53,25 @@ void NachOS_Halt() {		// System call 0
  *  System call interface: void Exit( int )
  */
 void NachOS_Exit() {		// System call 1
+	ThreadStatus exitStatus = (ThreadStatus)machine->ReadRegister(4);
+	int threadId = currentThread->get_pid();
+	printf("EXIT 1");
+	// BORRAR DEL BITMAP EL ADDRES SPACE DEL HILO
 	
-	//devolver los de addrespace: colocar las paginas como libres
-	
-	currentThread->space->~AddrSpace(); //aqui ya se toma en cuenta si es hilo o proceso. 
-	
-	
-	//Caso especial, que el que haga exit sea un hilo.
-	//los hilos comparte Text, Data.
-	//lo unico que hay que devolver es la pila. 
-	
-	//debe devolver un valor al join, si algun otro proceso espera por mi. 
-	
-	//tengo que hacerle signal al semaforo de mi padre, si esta esperandome. para esto se usa la lista "waiting_list". hay tuplas de PADRE-HIJO.
-	//el semaphore lo tiene tanto el padre como el hijo, si se incluye en en addrspace, o se crea una lista de semaphores en el system.h y se saca de ahi. 
-	
-	
-	 currentThread->Finish(); 
-	//hay que retornar el return_value, creo. 
+    // CAMBIA EL ESTATUS DEL THREAD (SI DA 0, SE SALIO BIEN )
+    // currentThread->setStatus(exitStatus);
+
+    // SI EL PADRE DEL HILO ESTA DORMIDO, LO DESPIERTA
+    if((currentThread ->getParent()) != NULL && (currentThread->getParent()-> getStatus() == BLOCKED)){
+		//scheduler->ReadyToRun(currentThread->getParent()); //LE DICE AL SCHEDULER QUE DESPIERTE AL PADRE
+		
+    }
+
+    // FINALIZA EL THREAD
+	printf("EXIT 2");
+	currentThread->space->deleteAddrspace();
+	printf("EXIT 3");
+	currentThread->Finish();
 }
 
 
@@ -93,7 +96,7 @@ void NachOS_Exec() {		// System call 2
 	c_data[0] = *(char*)buffer;
 
 	 
-	while(c_data != '\0' && index_all_data < data_capacity) {
+	while(c_data[0] != '\0' && index_all_data < data_capacity) {
 		all_data[index_all_data] = c_data[0]; 
 		
 		++data; 
@@ -102,7 +105,7 @@ void NachOS_Exec() {		// System call 2
 		c_data[0] = *(char*)buffer; 
 	} 
 
-	if (c_data == '\0' && index_all_data < data_capacity) {	//se pudo leer todo en el buffer de capacidad :  "data_capacity"
+	if (c_data[0] == '\0' && index_all_data < data_capacity) {	//se pudo leer todo en el buffer de capacidad :  "data_capacity"
 		all_data[index_all_data] = c_data[0]; 
 		OpenFile * executable = fileSystem->Open(all_data); 
 		AddrSpace * addr_space = new AddrSpace(executable);
@@ -347,6 +350,14 @@ void NachOS_Fork() {		// System call 9
    DEBUG( 'u', "Entering Fork System call\n" );
    printf("ESTOY EN NACHOS_FORK()\n "); 
    
+   //char * myId = (char *) calloc(10,sizeof(char));
+   int id = currentThread->get_pid();
+   printf("ID: %d \n",id);
+   char * myId = (char *)calloc(20,sizeof(char));
+   sprintf(myId,"%d",id);
+   
+	printf("MYID: %s \n", myId);
+   Semaphore * sem = new Semaphore(myId,1);
    Thread * newT = new Thread("Child");
       
 	newT->space = new AddrSpace( currentThread->space );

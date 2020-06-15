@@ -44,13 +44,15 @@ Thread::Thread(const char* threadName)
     if (count_threads == 0) {
 		++count_threads; 
 		this->pid = count_threads;
-		this->father_pid = -1; 		//soy el primero, no tengo padre.  
+		this->father_pid = -1; 		//soy el primero, no tengo padre. 
+		this->father = NULL;
 		++count_threads;
 	}
 	else {
 		this->pid = count_threads; 
 		++count_threads; 
-		this->father_pid = currentThread->get_pid(); 
+		this->father_pid = currentThread->get_pid();
+		this->father = currentThread;
 	}
 	
     status = JUST_CREATED;
@@ -58,7 +60,9 @@ Thread::Thread(const char* threadName)
     space = NULL;
 #endif
 }
-
+Thread * Thread::getParent(){
+	return father;
+}
 //----------------------------------------------------------------------
 // Thread::~Thread
 // 	De-allocate a thread.
@@ -183,6 +187,11 @@ Thread::Finish ()
     Sleep();					// invokes SWITCH
     // not reached
 }
+
+
+
+
+
 
 //----------------------------------------------------------------------
 // Thread::Yield
