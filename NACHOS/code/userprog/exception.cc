@@ -26,7 +26,8 @@
 #include "syscall.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <sys/types.h>
+#include <sys/socket.h>
 
 
 void returnFromSystemCall() {
@@ -200,24 +201,6 @@ void NachOS_Exec() {		// System call 2
 /*
  *  System call interface: int Join( SpaceId )
  */
-  
-/*
- * 
- * Francisco Arroyo:
-En el "Join" tenemos la información de los dos hilos, como usted indica, "currentThread" que es el proceso padre P y en registro 4 el hilo por el 
-* que debo esperar H.  Entonces en el momento que el proceso llama a "Join" debe crear una estructura de datos para almacenar 
-* esta relación "P espera por H", luego el proceso P debe esperar por un semáforo, por ejemplo.
-
-Cuando el proceso H termine, llamando a "Exit" verifica la estructura de datos para comprobar si hay alguno esperando por él y, 
-* en caso positivo, le hace "Signal" al semáforo para que el otro proceso P puede seguir su ejecución.  Recuerde también que "Exit" 
-* recibe un parámetro que se debe entregar al proceso P como retorno del "Join".
-
-Le llega lo que usted devuelva en "Exec".
-
-Recuerdo que NO es buena idea pasar punteros de estructuras a los programas de usuario, entonces sería recomendable que "Exec" devuelva un número, 
-* por ejemplo, un índice de una tabla de los procesos que hacen "Join". 
- * */
-
 
 void NachOS_Join() {		// System call 3
 
@@ -236,6 +219,7 @@ char* id = (char*)calloc(20, sizeof(char));
 
 ListElement<Semaphore*>* c_node = process_threads->head();  
 my_sem = find_my_sem(c_node, my_pid); 
+//currentThread->sem->setValue(my_sem->getValue()-1);			//el semaforo al crearse tiene 1 de valor, ahora quiero esperar 1 hilo, entonces lo decremento.  
 my_sem->setValue(my_sem->getValue()-1);			//el semaforo al crearse tiene 1 de valor, ahora quiero esperar 1 hilo, entonces lo decremento.  
 
 printf("soy el hilo : %s - entrando al semaforo\n", my_sem->getName()); 
@@ -423,11 +407,13 @@ void NachOS_Fork() {		// System call 9
    char * myId = (char *)calloc(20,sizeof(char));
    sprintf(myId,"%d",id);
    Semaphore * sem = new Semaphore(myId,1);	//cada proceso/hilo que ejecuta fork, va a necesitar un semaforo, se usa solo si hace join. 
-   
+   currentThread->sem = sem;
+
    process_threads->Append(sem); 			//lista de semaforos, cada semaforo tiene de nombre el mismo id del hilo. 
    
    Thread * newT = new Thread("Child");
       
+
 	newT->space = new AddrSpace( currentThread->space );
 	
    newT->Fork((VoidFunctionPtr)NachosForkThread, (void*)machine->ReadRegister(4));
@@ -551,6 +537,8 @@ void NachOS_CondBroadcast() {		// System call 23
  *  System call interface: Socket_t Socket( int, int )
  */
 void NachOS_Socket() {			// System call 30
+   int i = socket(1, 1, 1);
+   printf("Socket id: %d\n", i);
 }
 
 

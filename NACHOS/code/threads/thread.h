@@ -39,11 +39,15 @@
 
 #include "copyright.h"
 #include "utility.h"
+//#include "synch.h"
 
 #ifdef USER_PROGRAM
 #include "machine.h"
 #include "addrspace.h"
+
 #endif
+
+class Semaphore;
 
 // CPU register state to be saved on context switch.  
 // x86 processors needs 9 32-bit registers, whereas x64 has 8 extra registers
@@ -106,6 +110,7 @@ class Thread {
 	
 	
 
+  Semaphore * sem;
 	int get_pid(); 
 	Thread * getParent();
 

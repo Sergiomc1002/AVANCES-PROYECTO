@@ -14,6 +14,7 @@ int main( int argc, char * argv[] ) {
 	//snprintf(msg, sizeof(msg), "id del hijo : %d \n", child_id);
 
 
+	Socket();
 
 	Fork(SimpleThread);
 

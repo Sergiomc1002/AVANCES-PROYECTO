@@ -79,6 +79,7 @@ Thread * Thread::getParent(){
 
 Thread::~Thread()
 {
+    //free(sem);
     DEBUG('t', "Deleting thread \"%s\"\n", name);
 
     ASSERT(this != currentThread);
