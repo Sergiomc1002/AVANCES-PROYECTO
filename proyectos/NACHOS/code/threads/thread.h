@@ -111,6 +111,7 @@ class Thread {
 	
 
 	Semaphore * my_sem;
+  int idSocket;
 	int get_pid(); 
 	Thread * getParent();
 

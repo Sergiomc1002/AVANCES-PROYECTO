@@ -49,6 +49,13 @@ halt: halt.o start.o
 	$(LD) $(LDFLAGS) start.o halt.o -o halt.coff
 	../bin/coff2noff halt.coff halt
 
+# Client
+client.o: client.c
+	$(CC) $(CFLAGS) -c client.c
+client: client.o start.o
+	$(LD) $(LDFLAGS) start.o client.o -o client.coff
+	../bin/coff2noff client.coff client
+
 shell.o: shell.c
 	$(CC) $(CFLAGS) -c shell.c
 shell: shell.o start.o

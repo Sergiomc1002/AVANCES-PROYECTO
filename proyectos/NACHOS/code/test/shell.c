@@ -1,6 +1,7 @@
 #include "syscall.h"
-/*
-void test_1() {
+
+#if 1
+int main() {
 
 
      SpaceId newProc;
@@ -32,10 +33,10 @@ void test_1() {
 	
 	
 }
-*/
+#endif
 
-
- int main() {
+#if 0
+int main() {
 	
 	char * buffer = (char *)"../test/pingPong";
 
@@ -48,4 +49,4 @@ void test_1() {
     Write(nP, 1, 1);
     Write("\nimprimiendo\n", 13,1); 	
  }
-
+#endif

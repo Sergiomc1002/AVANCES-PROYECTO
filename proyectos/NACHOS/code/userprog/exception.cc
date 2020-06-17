@@ -28,7 +28,9 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 void returnFromSystemCall() {
 
@@ -365,7 +367,13 @@ void NachOS_Write() {		// System call 6
 			// Get the unix handle from our table for open files
 			// Do the write to the already opened Unix file
 			// Return the number of chars written to user, via r2		
-		
+         int so; 
+         char * buffer = (char *) calloc(count, sizeof(char));
+		   for (int index = 0; index < count; ++index) { 
+				machine->ReadMem( addr+index, 1, &so);
+            buffer[index] = so;
+         }
+         int s = write(file, buffer, count);
 		break; 
 	}
 	
@@ -395,6 +403,39 @@ void NachOS_Write() {		// System call 6
  *  System call interface: OpenFileId Read( char *, int, OpenFileId )
  */
 void NachOS_Read() {		// System call 7
+   // 1 crear buffer local de tam r5
+   // 2 hacer read con idSocket reg 6
+   // 3 despues de leer, 
+   // write en machine en pos r4 el buffer local 
+
+   int addr, count;
+	int file = 0; 
+   addr = machine->ReadRegister( 4 );
+   printf("Addr: %d\n", addr);
+   count = machine->ReadRegister( 5 );
+   
+   file = machine->ReadRegister( 6 );
+
+   char * buffer = (char *) calloc(count, sizeof(char));
+
+   int r = read(file, buffer, count);
+
+   if (r == 0) {
+      // Read vacio
+      printf("read 0\n");
+      return;
+   }
+   else {
+      // Escribir buffer a addr
+      int so;
+      for (int index = 0; index < r; ++index) {
+         int val = buffer[index]; 
+         machine->WriteMem( addr+index, 1, val);
+      }
+   }
+      
+   printf("Read result: %d\n", r);
+   machine->WriteRegister(2, r);
 }
 
 
@@ -402,6 +443,11 @@ void NachOS_Read() {		// System call 7
  *  System call interface: void Close( OpenFileId )
  */
 void NachOS_Close() {		// System call 8
+   int fId = machine->ReadRegister(4);
+
+   int result = close(fId);
+   if (result == -1)
+        perror("close");
 }
 
 
@@ -516,9 +562,17 @@ void NachOS_CondBroadcast() {		// System call 23
 /*
  *  System call interface: Socket_t Socket( int, int )
  */
+//TEst
 void NachOS_Socket() {			// System call 30
-   int i = socket(1, 1, 1);
-   printf("Socket id: %d\n", i);
+   int domain = machine->ReadRegister( 4 );
+   int type = machine->ReadRegister( 5 );
+   Socket_t idSocket = socket(domain, type, 0);
+   
+   if(idSocket == -1)
+      printf("socket constructor error\n");
+
+   currentThread->idSocket = idSocket;
+   machine->WriteRegister(2, idSocket); 
 }
 
 
@@ -526,6 +580,58 @@ void NachOS_Socket() {			// System call 30
  *  System call interface: Socket_t Connect( char *, int )
  */
 void NachOS_Connect() {		// System call 31
+   int idSocket = machine->ReadRegister( 4 );
+
+   //Sacar hostip de memoria
+   //char * hostip = (char *) machine->ReadRegister( 5 );
+   int data = machine->ReadRegister(5);			//yo se que es un char*
+	
+	int* buffer = (int*)calloc(1, sizeof(int)); 
+	
+	int data_capacity = 100; 
+	char* hostip = (char*)calloc(data_capacity, sizeof(char)); 
+	int index_all_data = 0; 
+	
+	machine->ReadMem(data, 1, buffer);
+	
+	char c_data[1]; 
+	c_data[0] = *(char*)buffer;
+
+	 
+	while(c_data[0] != '\0' && index_all_data < data_capacity) {
+		hostip[index_all_data] = c_data[0]; 
+		
+		++data; 
+		++index_all_data; 
+		machine->ReadMem(data, 1, buffer); 
+		c_data[0] = *(char*)buffer; 
+	} 
+
+   //printf("Hostip: %s\n", hostip);
+
+   int port = machine->ReadRegister( 6 );
+
+   int sockSize = sizeof(struct sockaddr_in);
+   struct sockaddr_in addr;
+   //struct sockaddr_in * addr = (sockaddr_in *) calloc(1, sockSize);
+
+   addr.sin_family = AF_INET;
+   addr.sin_port = htons(port);
+
+   // if (inet_pton(AF_INET, hostip, &(addr->sin_addr)) <= 0)
+   //  {
+   //      printf("Direccion Invalida. Direccion no soportada.\n");
+   //  }
+   //addr->sin_addr.s_addr = inet_addr(hostip);
+   inet_aton( hostip, & addr.sin_addr ); 
+
+   int result = connect(idSocket, (struct sockaddr *) &addr, sockSize);
+
+   if (result == -1)
+      perror("socket connect error\n");
+
+   //free(addr);
+   machine->WriteRegister(2, result); 
 }
 
 
@@ -533,6 +639,22 @@ void NachOS_Connect() {		// System call 31
  *  System call interface: int Bind( Socket_t, int )
  */
 void NachOS_Bind() {		// System call 32
+   int idSocket = machine->ReadRegister(4);
+   int port = machine->ReadRegister(5);
+
+   int sockSize = sizeof(struct sockaddr_in);
+   struct sockaddr_in  addr;
+
+   addr.sin_family = AF_INET;
+   addr.sin_addr.s_addr = INADDR_ANY;
+   addr.sin_port = htons(port);
+
+   int result = bind(idSocket, (struct sockaddr *) &addr, sockSize);
+    
+    if (result == -1)
+        perror("socket bind");
+    
+    machine->WriteRegister(2, result);
 }
 
 
@@ -540,6 +662,15 @@ void NachOS_Bind() {		// System call 32
  *  System call interface: int Listen( Socket_t, int )
  */
 void NachOS_Listen() {		// System call 33
+   int idSocket = machine->ReadRegister(4);
+   int backlog = machine->ReadRegister(5);
+
+   int result = listen(idSocket, backlog);
+
+   if (result == -1)
+        perror("socket listen");
+    
+   machine->WriteRegister(2, result);
 }
 
 
@@ -547,6 +678,16 @@ void NachOS_Listen() {		// System call 33
  *  System call interface: int Accept( Socket_t )
  */
 void NachOS_Accept() {		// System call 34
+   int idSocket = machine->ReadRegister(4);
+   sockaddr_in addr;
+   socklen_t size = sizeof(addr);
+   int fd_s = accept(idSocket, (struct sockaddr *) &addr, &size);
+
+   if (fd_s == -1) 
+      perror("Connection failed....\n");
+      
+
+   machine->WriteRegister(2, fd_s);
 }
 
 

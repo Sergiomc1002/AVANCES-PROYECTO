@@ -29,6 +29,7 @@ void* run(void* data) {
 	if(-1 == thread_data->server_socket->Read(msg_from_client,512,thread_data->client_id)) {
 		perror("there was an error");
 	}
+	printf("Message from client: %s\n", msg_from_client);
 	char* filename = get_file_name(msg_from_client);
 	char* response_header = make_response_header(filename, 0); 		//ese 0, deberian ser la cantidad de bytes del archivo. 
 	char* buffer_to_read_file = (char*)calloc(1024, sizeof(char)); 
