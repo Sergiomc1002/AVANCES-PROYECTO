@@ -169,7 +169,7 @@ void NachOS_Exec() {		// System call 2
 
 void NachOS_Join() {		// System call 3
 
-printf("ENTRANDO AL JOIN \n");
+printf("thread : %d - ENTRANDO AL JOIN \n", currentThread->get_pid());
  
 int  child_pid = machine->ReadRegister(4); 
 
@@ -208,7 +208,16 @@ void NachOS_Exit() {		// System call 1
 	ThreadStatus exitStatus = (ThreadStatus)machine->ReadRegister(4);
 	int threadId = currentThread->get_pid();
 
-	printf("soy el hilo/proceso : %d y estoy saliendo \n", currentThread->get_pid()); 
+	printf("soy el hilo/proceso : %d y estoy saliendo \n", currentThread->get_pid());
+	
+	ListElement<father_son_t*>* node_c = waiting_list->head(); 
+	int counter = 0; 
+	while (node_c != NULL) {
+		++counter; 
+		node_c = node_c->next; 
+	}
+	printf("longitud de waiting list : %d \n", counter);  
+	
 	
 	//if (!currentThread->space->am_I_process()) {			//si no soy un proceso, soy un hilo. 
 		ListElement<father_son_t*>* c_node = waiting_list->head(); 

@@ -1,5 +1,8 @@
 #include "syscall.h"
 
+
+//#define PINGPONG true
+
 void SimpleThread(int);
 
 int main( int argc, char * argv[] ) {
@@ -13,12 +16,11 @@ int main( int argc, char * argv[] ) {
 	//char msg[100]; 
 	//snprintf(msg, sizeof(msg), "id del hijo : %d \n", child_id);
 
+#ifdef PINGPONG
 	Fork(SimpleThread);
+#endif
 
 	//int child_id = machine->ReadRegister(2); 
-
-	//Join(3); 
-
 
 	//Join(child_id); 		//primero se iria a dormir, y luego ejecutaria SimpleThread, por lo que el hijo deberia imprimir primero. 
 	
@@ -38,14 +40,14 @@ void SimpleThread(int num)
     if (num == 1) {
 	for (num = 0; num < 5; num++) {
 		Write("HOLAA\n", 7, 1);
-		//Yield();
+		Yield();
 	}
     }
 
     else {
 	for (num = 0; num < 5; num++) {
 		Write("holaa\n", 7, 1);
-		//Yield();
+		Yield();
 	}
     }
     Write("Fin de\n", 7, 1);
