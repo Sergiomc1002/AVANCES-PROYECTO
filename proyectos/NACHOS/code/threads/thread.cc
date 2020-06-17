@@ -276,7 +276,7 @@ Thread::Sleep ()
 	interrupt->Idle();	// no one to run, wait for an interrupt
     }
     
-    printf("el siguiente thread en correr va a ser el : %d \n", nextThread->get_pid()); 
+    printf("Sleep: el siguiente thread en correr va a ser el : %d \n", nextThread->get_pid()); 
     
     scheduler->Run(nextThread); // returns when we've been signalled
 }

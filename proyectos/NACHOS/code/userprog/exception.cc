@@ -143,9 +143,9 @@ void NachOS_Exec() {		// System call 2
 	if (c_data[0] == '\0' && index_all_data < data_capacity) {	//se pudo leer todo en el buffer de capacidad :  "data_capacity"
 		all_data[index_all_data] = c_data[0]; 
 		OpenFile * executable = fileSystem->Open(all_data);
-      printf("All Data: %s\n", all_data); 
-      printf("Open File\n");
-      if (executable != NULL) printf("Archivo abierto\n");
+      //printf("All Data: %s\n", all_data); 
+      //printf("Open File\n");
+      //if (executable != NULL) printf("Archivo abierto\n");
 		AddrSpace * addr_space = new AddrSpace(executable);
 		Thread * newThread = new Thread("Child");
 		newThread->space = addr_space; 
@@ -191,7 +191,7 @@ Semaphore* my_sem; 		//se lo puedo poner de atributo a thread asi lo accedo mas 
 
 my_sem = currentThread->my_sem; 
 
-printf("estoy por meter el semaforo con indice : %s a la lista \n", my_sem->getName()); 
+//printf("estoy por meter el semaforo con indice : %s a la lista \n", my_sem->getName()); 
 
 process_threads->Append(my_sem); 	 
 
@@ -216,7 +216,7 @@ void NachOS_Exit() {		// System call 1
 		++counter; 
 		node_c = node_c->next; 
 	}
-	printf("longitud de waiting list : %d \n", counter);  
+	//	printf("longitud de waiting list : %d \n", counter);  
 	
 	
 	//if (!currentThread->space->am_I_process()) {			//si no soy un proceso, soy un hilo. 
@@ -226,7 +226,7 @@ void NachOS_Exit() {		// System call 1
 		if (-1 != who) {
 			printf("soy el hilo : %d y me esta esperando el hilo/proceso : %d \n", currentThread->get_pid(), who); 
 			Semaphore* sem = find_my_sem(process_threads->head(), who); 
-			printf("seleccione el semaforo : %s \n", sem->getName()); 
+			//printf("seleccione el semaforo : %s \n", sem->getName()); 
 			printf("liberandolo ... \n"); 
 			sem->V(); 
 		}
@@ -289,7 +289,7 @@ void NachOS_Fork() {		// System call 9
    
 	Thread * newT = new Thread("Child");
     
-    printf("soy el hilo/proceso :%d y estoy por copiarle mi addrSpace a mi hijo \n", currentThread->get_pid());   
+    //printf("soy el hilo/proceso :%d y estoy por copiarle mi addrSpace a mi hijo \n", currentThread->get_pid());   
 	
 	newT->space = new AddrSpace( currentThread->space );
 	
