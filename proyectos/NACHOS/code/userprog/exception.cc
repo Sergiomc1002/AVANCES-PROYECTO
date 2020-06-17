@@ -145,57 +145,6 @@ void NachOS_Exit() {		// System call 1
 	currentThread->space->deleteAddrspace();
 	currentThread->Finish();
 }
-
-
-/*
- *  System call interface: SpaceId Exec( char * )
- */
- 
- //quien le manda el char* ??
-void NachOS_Exec() {		// System call 2
-	
-	int data = machine->ReadRegister(4);			//yo se que es un char*
-	
-	int* buffer = (int*)calloc(1, sizeof(int)); 
-	
-	int data_capacity = 100; 
-	char* all_data = (char*)calloc(data_capacity, sizeof(char)); 
-	int index_all_data = 0; 
-	
-	machine->ReadMem(data, 1, buffer);
-	
-	char c_data[1]; 
-	c_data[0] = *(char*)buffer;
-
-	 
-	while(c_data[0] != '\0' && index_all_data < data_capacity) {
-		all_data[index_all_data] = c_data[0]; 
-		
-		++data; 
-		++index_all_data; 
-		machine->ReadMem(data, 1, buffer); 
-		c_data[0] = *(char*)buffer; 
-	} 
-
-	if (c_data[0] == '\0' && index_all_data < data_capacity) {	//se pudo leer todo en el buffer de capacidad :  "data_capacity"
-		all_data[index_all_data] = c_data[0]; 
-		OpenFile * executable = fileSystem->Open(all_data); 
-		AddrSpace * addr_space = new AddrSpace(executable);
-		currentThread->space = addr_space; 
-		addr_space->InitRegisters(); 
-		addr_space->RestoreState(); 
-		free(all_data);
-		free(c_data);
-		machine->Run();   
-	}
-	else {					//no hay suficiente espacio. 
-		printf("no se pudo realizar exec por falta de memoria\n"); 
-	}
-
-
-//se supone que EXEC le tiene que pasar el id, a Join, pero no entiendo porque. no tiene mucho sentido creo. 
-}
-
  
  
 /*
@@ -319,43 +268,6 @@ void NachOS_Write() {		// System call 6
 	
 }
 
-//PENDIENTE - LO QUE FALTA DE WRITE. 
-//void Write(
-//        char * buffer = NULL;
-//        int size = machine->ReadRegister( 5 );	// Read size to write
-
-          // buffer = Read data from address given by user;
-//        OpenFileId id = machine->ReadRegister( 6 );	// Read file descriptor
-
-	// Need a semaphore to synchronize access to console
-	// Console->P();
-//	switch (id) {
-//		case  ConsoleInput:	// User could not write to standard input
-//			machine->WriteRegister( 2, -1 );
-//			break;
-//		case  ConsoleOutput:
-//			buffer[ size ] = 0;
-//			printf( "%s", buffer );
-//		break;
-//		case ConsoleError:	// This trick permits to write integers to console
-//			printf( "%d\n", machine->ReadRegister( 4 ) );
-//			break;
-//		default:	// All other opened files
-			// Verify if the file is opened, if not return -1 in r2
-			// Get the unix handle from our table for open files
-			// Do the write to the already opened Unix file
-			// Return the number of chars written to user, via r2
-//			break;
-
-//	}
-	// Update simulation stats, see details in Statistics class in machine/stats.cc
-	// Console->V();
-
-//}       // Nachos_Write
-
-
-
-
 /*
  *  System call interface: OpenFileId Read( char *, int, OpenFileId )
  */
@@ -423,7 +335,69 @@ void NachOS_Fork() {		// System call 9
    //machine->WriteRegister(2,newT->get_pid());	//pasarle al padre el id del hijo. 
  
 }
+ void NachosExecThread( void * p ) { 
+ 
+    AddrSpace *space;
 
+   space = currentThread->space;
+
+    space->InitRegisters();		// set the initial register values
+    space->RestoreState();		// load page table register
+
+    machine->Run();			// jump to the user progam
+    ASSERT(false);	
+ 
+ }
+/*
+ *  System call interface: SpaceId Exec( char * )
+ */
+ 
+ //quien le manda el char* ??
+void NachOS_Exec() {		// System call 2
+	printf("NachosExec\n");
+	int data = machine->ReadRegister(4);			//yo se que es un char*
+	
+	int* buffer = (int*)calloc(1, sizeof(int)); 
+	
+	int data_capacity = 100; 
+	char* all_data = (char*)calloc(data_capacity, sizeof(char)); 
+	int index_all_data = 0; 
+	
+	machine->ReadMem(data, 1, buffer);
+	
+	char c_data[1]; 
+	c_data[0] = *(char*)buffer;
+
+	 
+	while(c_data[0] != '\0' && index_all_data < data_capacity) {
+		all_data[index_all_data] = c_data[0]; 
+		
+		++data; 
+		++index_all_data; 
+		machine->ReadMem(data, 1, buffer); 
+		c_data[0] = *(char*)buffer; 
+	} 
+
+	if (c_data[0] == '\0' && index_all_data < data_capacity) {	//se pudo leer todo en el buffer de capacidad :  "data_capacity"
+		all_data[index_all_data] = c_data[0]; 
+		OpenFile * executable = fileSystem->Open(all_data);
+      printf("All Data: %s\n", all_data); 
+      printf("Open File\n");
+      if (executable != NULL) printf("Archivo abierto\n");
+		AddrSpace * addr_space = new AddrSpace(executable);
+		Thread * newThread = new Thread("Child");
+      newThread->space = addr_space; 
+		//free(all_data);
+		//free(c_data);
+      newThread->Fork((VoidFunctionPtr)NachosExecThread, NULL); 
+      machine->WriteRegister(2, newThread->get_pid()); 
+	}
+	else {					//no hay suficiente espacio. 
+		printf("no se pudo realizar exec por falta de memoria\n"); 
+	}
+
+//se supone que EXEC le tiene que pasar el id, a Join, pero no entiendo porque. no tiene mucho sentido creo. 
+}
 
 
 /*
