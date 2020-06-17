@@ -56,12 +56,21 @@ Thread::Thread(const char* threadName)
 		this->father_pid = currentThread->get_pid();
 		this->father = currentThread;
 	}
+
+	int id = this->pid; 
+	char * myId = (char *)calloc(20,sizeof(char));
+	sprintf(myId,"%d",id);
+	Semaphore * sem = new Semaphore(myId,1);	//cada proceso/hilo que ejecuta fork, va a necesitar un semaforo, se usa solo si hace join. 
+	this->my_sem = sem;
+
+	
 	
     status = JUST_CREATED;
 #ifdef USER_PROGRAM
     space = NULL;
 #endif
 }
+
 Thread * Thread::getParent(){
 	return father;
 }
@@ -227,6 +236,7 @@ Thread::Yield ()
     nextThread = scheduler->FindNextToRun();
     if (nextThread != NULL) {
 	scheduler->ReadyToRun(this);
+	printf("yield: el siguiente thread a correr va a ser el : %d \n", nextThread->get_pid()); 
 	scheduler->Run(nextThread);
     }
     interrupt->SetLevel(oldLevel);
@@ -265,7 +275,9 @@ Thread::Sleep ()
     while ((nextThread = scheduler->FindNextToRun()) == NULL) {
 	interrupt->Idle();	// no one to run, wait for an interrupt
     }
-        
+    
+    printf("el siguiente thread en correr va a ser el : %d \n", nextThread->get_pid()); 
+    
     scheduler->Run(nextThread); // returns when we've been signalled
 }
 

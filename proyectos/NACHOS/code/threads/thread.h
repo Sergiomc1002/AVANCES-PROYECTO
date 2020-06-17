@@ -110,7 +110,7 @@ class Thread {
 	
 	
 
-  Semaphore * sem;
+	Semaphore * my_sem;
 	int get_pid(); 
 	Thread * getParent();
 

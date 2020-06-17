@@ -6,13 +6,14 @@ int main()
     char * buffer = (char *)"../test/pingPong";
 
     int newProc = Exec(buffer);
-    char n[3];
+	Join(newProc);
+    char n[1];
     n[0] = newProc + '0';
-    n[1] = 'Z';
-    n[2] = '\n';
     char * nP = n;
-    Write(nP, 3, 1);
- 	Join(newProc);
+    Write("imprimiendo\n", 12, 1); 
+    Write(nP, 1, 1);
+    Write("\nimprimiendo\n", 13,1); 
+	
 
 }
 

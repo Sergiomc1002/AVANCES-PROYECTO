@@ -95,67 +95,87 @@ int is_someone_waiting_for_me(ListElement<father_son_t*>* head, int my_id) {	//a
 }
 
 
+ void NachosExecThread( void * p ) { 
+ 
+    AddrSpace *space;
+
+   space = currentThread->space;
+
+    space->InitRegisters();		// set the initial register values
+    space->RestoreState();		// load page table register
+
+    machine->Run();			// jump to the user progam
+    ASSERT(false);	
+ 
+ }
+
 
 /*
- *  System call interface: void Exit( int )
+ *  System call interface: SpaceId Exec( char * )
  */
-
-
-	// BORRAR DEL BITMAP EL ADDRES SPACE DEL HILO
+ 
+ //quien le manda el char* ??
+void NachOS_Exec() {		// System call 2
+	printf("NachosExec\n");
+	int data = machine->ReadRegister(4);			//yo se que es un char*
 	
-    // CAMBIA EL ESTATUS DEL THREAD (SI DA 0, SE SALIO BIEN )
-    // currentThread->setStatus(exitStatus);
+	int* buffer = (int*)calloc(1, sizeof(int)); 
+	
+	int data_capacity = 100; 
+	char* all_data = (char*)calloc(data_capacity, sizeof(char)); 
+	int index_all_data = 0; 
+	
+	machine->ReadMem(data, 1, buffer);
+	
+	char c_data[1]; 
+	c_data[0] = *(char*)buffer;
 
-    // SI EL PADRE DEL HILO ESTA DORMIDO, LO DESPIERTA
-    //if((currentThread ->getParent()) != NULL && (currentThread->getParent()-> getStatus() == BLOCKED)){
-		//scheduler->ReadyToRun(currentThread->getParent()); //LE DICE AL SCHEDULER QUE DESPIERTE AL PADRE
+	 
+	while(c_data[0] != '\0' && index_all_data < data_capacity) {
+		all_data[index_all_data] = c_data[0]; 
 		
-    //}
-    
-    //tengo que buscar en waiting_list si yo estoy ahí, sacar al padre y hacerle signal.
-    //
-	
+		++data; 
+		++index_all_data; 
+		machine->ReadMem(data, 1, buffer); 
+		c_data[0] = *(char*)buffer; 
+	} 
 
-
-void NachOS_Exit() {		// System call 1
-	ThreadStatus exitStatus = (ThreadStatus)machine->ReadRegister(4);
-	int threadId = currentThread->get_pid();
-
-	printf("soy el hilo/proceso : %d y estoy saliendo \n", currentThread->get_pid()); 
-	
-	if (!currentThread->space->am_I_process()) {			//si no soy un proceso, soy un hilo. 
-		ListElement<father_son_t*>* c_node = waiting_list->head(); 
-		int who = is_someone_waiting_for_me(c_node, currentThread->get_pid()); 
-		
-		if (-1 != who) {
-			printf("soy el hilo : %d y me esta esperando el hilo/proceso : %d \n", currentThread->get_pid(), who); 
-			printf("liberandolo ... \n"); 
-			Semaphore* sem = find_my_sem(process_threads->head(), who); 
-			sem->V(); 
-		}
-		else {
-			//nadie me esta esperando. 
-		}
+	if (c_data[0] == '\0' && index_all_data < data_capacity) {	//se pudo leer todo en el buffer de capacidad :  "data_capacity"
+		all_data[index_all_data] = c_data[0]; 
+		OpenFile * executable = fileSystem->Open(all_data);
+      printf("All Data: %s\n", all_data); 
+      printf("Open File\n");
+      if (executable != NULL) printf("Archivo abierto\n");
+		AddrSpace * addr_space = new AddrSpace(executable);
+		Thread * newThread = new Thread("Child");
+		newThread->space = addr_space; 
+		//free(all_data);
+		//free(c_data);
+      newThread->Fork((VoidFunctionPtr)NachosExecThread, NULL); 
+      machine->WriteRegister(2, newThread->get_pid()); 
 	}
-	else {													//por ser proceso, no tengo que esperar a nadie, ni siquiera busco. 
-		//nadie me puede esperar. 
+	else {					//no hay suficiente espacio. 
+		printf("no se pudo realizar exec por falta de memoria\n"); 
 	}
 
-    // FINALIZA EL THREAD
-	currentThread->space->deleteAddrspace();
-	currentThread->Finish();
+//se supone que EXEC le tiene que pasar el id, a Join, pero no entiendo porque. no tiene mucho sentido creo. 
 }
- 
- 
+
+
+
 /*
  *  System call interface: int Join( SpaceId )
  */
 
 void NachOS_Join() {		// System call 3
 
+printf("ENTRANDO AL JOIN \n");
+ 
 int  child_pid = machine->ReadRegister(4); 
 
 int my_pid = currentThread->get_pid(); 
+
+printf("my id : %d - son id : %d \n", my_pid, child_pid);
 
 father_son_t* father_son = (father_son_t*)calloc(1,sizeof(father_son_t)); 
 father_son->son_pid =  child_pid; 
@@ -163,12 +183,18 @@ father_son->father_pid = my_pid;
 
 waiting_list->Append(father_son); 
 
-Semaphore* my_sem; 		//se lo puedo poner de atributo a thread asi lo accedo mas facil. 
-char* id = (char*)calloc(20, sizeof(char));
 
-ListElement<Semaphore*>* c_node = process_threads->head();  
-my_sem = find_my_sem(c_node, my_pid); 
-//currentThread->sem->setValue(my_sem->getValue()-1);			//el semaforo al crearse tiene 1 de valor, ahora quiero esperar 1 hilo, entonces lo decremento.  
+Semaphore* my_sem; 		//se lo puedo poner de atributo a thread asi lo accedo mas facil. 
+//char* id = (char*)calloc(20, sizeof(char));
+//ListElement<Semaphore*>* c_node = process_threads->head();  
+//my_sem = find_my_sem(c_node, my_pid); 
+
+my_sem = currentThread->my_sem; 
+
+printf("estoy por meter el semaforo con indice : %s a la lista \n", my_sem->getName()); 
+
+process_threads->Append(my_sem); 	 
+
 my_sem->setValue(my_sem->getValue()-1);			//el semaforo al crearse tiene 1 de valor, ahora quiero esperar 1 hilo, entonces lo decremento.  
 
 printf("soy el hilo : %s - entrando al semaforo\n", my_sem->getName()); 
@@ -177,6 +203,94 @@ my_sem->P(); 									//voy a esperar y me tengo que quedar en el semaforo, hast
 
 }
 
+
+void NachOS_Exit() {		// System call 1
+	ThreadStatus exitStatus = (ThreadStatus)machine->ReadRegister(4);
+	int threadId = currentThread->get_pid();
+
+	printf("soy el hilo/proceso : %d y estoy saliendo \n", currentThread->get_pid()); 
+	
+	//if (!currentThread->space->am_I_process()) {			//si no soy un proceso, soy un hilo. 
+		ListElement<father_son_t*>* c_node = waiting_list->head(); 
+		int who = is_someone_waiting_for_me(c_node, currentThread->get_pid()); 
+		
+		if (-1 != who) {
+			printf("soy el hilo : %d y me esta esperando el hilo/proceso : %d \n", currentThread->get_pid(), who); 
+			Semaphore* sem = find_my_sem(process_threads->head(), who); 
+			printf("seleccione el semaforo : %s \n", sem->getName()); 
+			printf("liberandolo ... \n"); 
+			sem->V(); 
+		}
+		else {
+			printf("soy el hilo/proces : %d y nadie me esta esperando \n", currentThread->get_pid()); 
+			//nadie me esta esperando. 
+		}
+	//}
+	//else {													//por ser proceso, no tengo que esperar a nadie, ni siquiera busco. 
+		//nadie me puede esperar. 
+	//}
+
+    // FINALIZA EL THREAD
+	currentThread->space->deleteAddrspace();
+	currentThread->Finish();
+}
+ 
+
+//void NachosForkThread( int p ) { // for 32 bits version
+ void NachosForkThread( void * p ) { // for 64 bits version
+    //printf("NachosForkThread\n");    
+    //printf("ESTOY EN NACHOS_FORK_THREAD\n"); 
+    
+    AddrSpace *space;
+
+    space= currentThread->space;
+    space->InitRegisters();             // set the initial register values
+    space->RestoreState();              // load page table register
+
+// Set the return address for this thread to the same as the main thread
+// This will lead this thread to call the exit system call and finish
+    machine->WriteRegister( RetAddrReg, 4 );
+
+    machine->WriteRegister( PCReg, (long) p );
+    machine->WriteRegister( NextPCReg, (long) p + 4 );
+
+    machine->Run();                     // jump to the user progam
+
+    //printf("SALIENDO DE NACHOS_FORK_THREAD\n");    
+    ASSERT(false);
+}
+
+/*
+ *  System call interface: void Fork( void (*func)() )
+ */
+void NachOS_Fork() {		// System call 9
+   
+   
+   DEBUG( 'u', "Entering Fork System call\n" );
+   //printf("ESTOY EN NACHOS_FORK()\n "); 
+   
+   //int id = currentThread->get_pid();
+   //char * myId = (char *)calloc(20,sizeof(char));
+   //sprintf(myId,"%d",id);
+   //Semaphore * sem = new Semaphore(myId,1);	//cada proceso/hilo que ejecuta fork, va a necesitar un semaforo, se usa solo si hace join. 
+   //currentThread->my_sem = sem;
+
+	//ahora el semaforo se crea en la clase thread de una vez. 
+   //process_threads->Append(currentThread->my_sem); 	 			//lista de semaforos, cada semaforo tiene de nombre el mismo id del hilo. 
+   
+	Thread * newT = new Thread("Child");
+    
+    printf("soy el hilo/proceso :%d y estoy por copiarle mi addrSpace a mi hijo \n", currentThread->get_pid());   
+	
+	newT->space = new AddrSpace( currentThread->space );
+	
+   newT->Fork((VoidFunctionPtr)NachosForkThread, (void*)machine->ReadRegister(4));
+   
+   //printf("SALIENDO DE NACHOS_FORK()\n");
+   
+   //machine->WriteRegister(2,newT->get_pid());	//pasarle al padre el id del hijo. 
+ 
+}
 
 /*
  *  System call interface: void Create( char * )
@@ -281,123 +395,6 @@ void NachOS_Read() {		// System call 7
 void NachOS_Close() {		// System call 8
 }
 
-
-//void NachosForkThread( int p ) { // for 32 bits version
- void NachosForkThread( void * p ) { // for 64 bits version
-    //printf("NachosForkThread\n");    
-    //printf("ESTOY EN NACHOS_FORK_THREAD\n"); 
-    
-    AddrSpace *space;
-
-    space= currentThread->space;
-    space->InitRegisters();             // set the initial register values
-    space->RestoreState();              // load page table register
-
-// Set the return address for this thread to the same as the main thread
-// This will lead this thread to call the exit system call and finish
-    machine->WriteRegister( RetAddrReg, 4 );
-
-    machine->WriteRegister( PCReg, (long) p );
-    machine->WriteRegister( NextPCReg, (long) p + 4 );
-
-    machine->Run();                     // jump to the user progam
-
-    //printf("SALIENDO DE NACHOS_FORK_THREAD\n");    
-    ASSERT(false);
-}
-
-/*
- *  System call interface: void Fork( void (*func)() )
- */
-void NachOS_Fork() {		// System call 9
-   
-   
-   DEBUG( 'u', "Entering Fork System call\n" );
-   //printf("ESTOY EN NACHOS_FORK()\n "); 
-   
-   int id = currentThread->get_pid();
-   char * myId = (char *)calloc(20,sizeof(char));
-   sprintf(myId,"%d",id);
-   Semaphore * sem = new Semaphore(myId,1);	//cada proceso/hilo que ejecuta fork, va a necesitar un semaforo, se usa solo si hace join. 
-   currentThread->sem = sem;
-
-   process_threads->Append(sem); 			//lista de semaforos, cada semaforo tiene de nombre el mismo id del hilo. 
-   
-   Thread * newT = new Thread("Child");
-      
-
-	newT->space = new AddrSpace( currentThread->space );
-	
-   newT->Fork((VoidFunctionPtr)NachosForkThread, (void*)machine->ReadRegister(4));
-   
-   //printf("SALIENDO DE NACHOS_FORK()\n");
-   
-   //machine->WriteRegister(2,newT->get_pid());	//pasarle al padre el id del hijo. 
- 
-}
- void NachosExecThread( void * p ) { 
- 
-    AddrSpace *space;
-
-   space = currentThread->space;
-
-    space->InitRegisters();		// set the initial register values
-    space->RestoreState();		// load page table register
-
-    machine->Run();			// jump to the user progam
-    ASSERT(false);	
- 
- }
-/*
- *  System call interface: SpaceId Exec( char * )
- */
- 
- //quien le manda el char* ??
-void NachOS_Exec() {		// System call 2
-	printf("NachosExec\n");
-	int data = machine->ReadRegister(4);			//yo se que es un char*
-	
-	int* buffer = (int*)calloc(1, sizeof(int)); 
-	
-	int data_capacity = 100; 
-	char* all_data = (char*)calloc(data_capacity, sizeof(char)); 
-	int index_all_data = 0; 
-	
-	machine->ReadMem(data, 1, buffer);
-	
-	char c_data[1]; 
-	c_data[0] = *(char*)buffer;
-
-	 
-	while(c_data[0] != '\0' && index_all_data < data_capacity) {
-		all_data[index_all_data] = c_data[0]; 
-		
-		++data; 
-		++index_all_data; 
-		machine->ReadMem(data, 1, buffer); 
-		c_data[0] = *(char*)buffer; 
-	} 
-
-	if (c_data[0] == '\0' && index_all_data < data_capacity) {	//se pudo leer todo en el buffer de capacidad :  "data_capacity"
-		all_data[index_all_data] = c_data[0]; 
-		OpenFile * executable = fileSystem->Open(all_data);
-      printf("All Data: %s\n", all_data); 
-      printf("Open File\n");
-      if (executable != NULL) printf("Archivo abierto\n");
-		AddrSpace * addr_space = new AddrSpace(executable);
-		Thread * newThread = new Thread("Child");
-      newThread->space = addr_space; 
-		//free(all_data);
-		//free(c_data);
-      newThread->Fork((VoidFunctionPtr)NachosExecThread, NULL); 
-      machine->WriteRegister(2, newThread->get_pid()); 
-	}
-	else {					//no hay suficiente espacio. 
-		printf("no se pudo realizar exec por falta de memoria\n"); 
-	}
-
-//se supone que EXEC le tiene que pasar el id, a Join, pero no entiendo porque. no tiene mucho sentido creo. 
-}
 
 
 /*
