@@ -236,7 +236,6 @@ Thread::Yield ()
     nextThread = scheduler->FindNextToRun();
     if (nextThread != NULL) {
 	scheduler->ReadyToRun(this);
-	printf("yield: el siguiente thread a correr va a ser el : %d \n", nextThread->get_pid()); 
 	scheduler->Run(nextThread);
     }
     interrupt->SetLevel(oldLevel);
@@ -274,10 +273,7 @@ Thread::Sleep ()
     status = BLOCKED;
     while ((nextThread = scheduler->FindNextToRun()) == NULL) {
 	interrupt->Idle();	// no one to run, wait for an interrupt
-    }
-    
-    printf("Sleep: el siguiente thread en correr va a ser el : %d \n", nextThread->get_pid()); 
-    
+    }    
     scheduler->Run(nextThread); // returns when we've been signalled
 }
 

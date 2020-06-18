@@ -43,7 +43,6 @@ SynchDisk   *synchDisk;
 Machine *machine;	// user program memory and registers
 BitMap * memoryMap;
 List<father_son_t*>* waiting_list; 
-//Semaphore *semaphore; 
 List<Semaphore*> *process_threads; 
 //NachosOpenFilesTable* open_files_table;
 #endif
@@ -142,7 +141,7 @@ Initialize(int argc, char **argv)
 	    }
 	}
 #ifdef USER_PROGRAM
-	memoryMap = new BitMap(32);
+	memoryMap = new BitMap(NumPhysPages);
 	waiting_list = new List<father_son_t*>(); 
 	//semaphore = new Semaphore("sema", 0); 
 	process_threads = new List<Semaphore*>(); 

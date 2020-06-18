@@ -104,9 +104,6 @@ AddrSpace::AddrSpace(AddrSpace * father)
 		pageTable[i].dirty = false;
 		pageTable[i].readOnly = false;
 	}	
-
-	//se implemento de otra manera.
-	//this->semaphore = father->get_semaphore(); 			//los hijos tienen que tener el semaforo del padre, para poder hacerle Signal al terminar. 
 	
 }
 
@@ -125,19 +122,6 @@ TranslationEntry * AddrSpace::GetPageTable(){
 }
 AddrSpace::AddrSpace(OpenFile *executable)
 {
-	
-
-	//SE IMPLEMENTO DE OTRA MANERA. 
-	//Semaphore* semaphore = new Semaphore("", 0); 
-	//process_threads->Append(semaphore); 
-
-	/*
-	char semaphore_name[10]; 
-	//strcpy(semaphore_name, "id:");
-	sprintf(semaphore_name,"%d", currentThread->get_pid()); 	
-	semaphore = new Semaphore(semaphore_name, 1);			//semaphore de cada proceso, los procesos tienen un semaphore y los hilos el semaphore del padre. 
-	*/
-	
 	
 	this->imProcess = true;
     NoffHeader noffH;
@@ -166,7 +150,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
     DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
 					numPages, size);
-// first, set up the translation ç
+// first, set up the translation 
 	memoryMap->Mark(0);
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
@@ -197,15 +181,12 @@ AddrSpace::AddrSpace(OpenFile *executable)
         // executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
 			// noffH.initData.size, noffH.initData.inFileAddr);
     // }
-	printf("ESTOY ANTES DE ASIGNAR MEMORIA\n");
 	int sizeP = divRoundUp((noffH.code.size + noffH.initData.size),PageSize);
 	int archivoPos = sizeof(noffH);
 	for(int i = 0; i < sizeP; ++i ){
 		executable->ReadAt(&(machine->mainMemory[(pageTable[i].physicalPage) * PageSize]), PageSize,archivoPos);
 		archivoPos += PageSize;
 	}
-	printf("TERMINE DE CARGAR MEMORIA\n");
-
 }
 
 //----------------------------------------------------------------------

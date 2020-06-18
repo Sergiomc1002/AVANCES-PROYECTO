@@ -1,6 +1,6 @@
 #include "syscall.h"
 
-#if 1
+#if 0
 int main() {
 
 
@@ -35,7 +35,7 @@ int main() {
 }
 #endif
 
-#if 0
+#if 1
 int main() {
 	
 	char * buffer = (char *)"../test/pingPong";
@@ -45,8 +45,9 @@ int main() {
     char n[1];
     n[0] = newProc + '0';
     char * nP = n;
-    Write("imprimiendo\n", 12, 1); 
+    
+    Write("\ngetting out of the Join after waiting the thread # ", 52, 1); 
     Write(nP, 1, 1);
-    Write("\nimprimiendo\n", 13,1); 	
+    Write("\nFINISHING....\n", 15,1); 	
  }
 #endif

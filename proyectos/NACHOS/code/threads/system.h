@@ -42,8 +42,6 @@ extern Timer *timer;				// the hardware alarm clock
 extern Machine* machine;	// user program memory and registers
 extern BitMap * memoryMap;
 extern List<father_son_t*>* waiting_list;
-//extern Semaphore* semaphore; 
-//extern Semaphore semaphore; 
 extern List<Semaphore*> *process_threads; 
 //extern NachosOpenFilesTable* open_files_table; 
 #endif

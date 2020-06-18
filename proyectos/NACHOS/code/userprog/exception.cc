@@ -116,10 +116,9 @@ int is_someone_waiting_for_me(ListElement<father_son_t*>* head, int my_id) {	//a
  *  System call interface: SpaceId Exec( char * )
  */
  
- //quien le manda el char* ??
+ 
 void NachOS_Exec() {		// System call 2
-	printf("NachosExec\n");
-	int data = machine->ReadRegister(4);			//yo se que es un char*
+	int data = machine->ReadRegister(4);
 	
 	int* buffer = (int*)calloc(1, sizeof(int)); 
 	
@@ -145,9 +144,6 @@ void NachOS_Exec() {		// System call 2
 	if (c_data[0] == '\0' && index_all_data < data_capacity) {	//se pudo leer todo en el buffer de capacidad :  "data_capacity"
 		all_data[index_all_data] = c_data[0]; 
 		OpenFile * executable = fileSystem->Open(all_data);
-      //printf("All Data: %s\n", all_data); 
-      //printf("Open File\n");
-      //if (executable != NULL) printf("Archivo abierto\n");
 		AddrSpace * addr_space = new AddrSpace(executable);
 		Thread * newThread = new Thread("Child");
 		newThread->space = addr_space; 
@@ -157,10 +153,8 @@ void NachOS_Exec() {		// System call 2
       machine->WriteRegister(2, newThread->get_pid()); 
 	}
 	else {					//no hay suficiente espacio. 
-		printf("no se pudo realizar exec por falta de memoria\n"); 
-	}
-
-//se supone que EXEC le tiene que pasar el id, a Join, pero no entiendo porque. no tiene mucho sentido creo. 
+		printf("There was no enough memory : change data_capacity and try again\n"); 
+	} 
 }
 
 
@@ -170,14 +164,10 @@ void NachOS_Exec() {		// System call 2
  */
 
 void NachOS_Join() {		// System call 3
-
-printf("thread : %d - ENTRANDO AL JOIN \n", currentThread->get_pid());
  
 int  child_pid = machine->ReadRegister(4); 
 
 int my_pid = currentThread->get_pid(); 
-
-printf("my id : %d - son id : %d \n", my_pid, child_pid);
 
 father_son_t* father_son = (father_son_t*)calloc(1,sizeof(father_son_t)); 
 father_son->son_pid =  child_pid; 
@@ -186,20 +176,18 @@ father_son->father_pid = my_pid;
 waiting_list->Append(father_son); 
 
 
-Semaphore* my_sem; 		//se lo puedo poner de atributo a thread asi lo accedo mas facil. 
+Semaphore* my_sem; 
 //char* id = (char*)calloc(20, sizeof(char));
 //ListElement<Semaphore*>* c_node = process_threads->head();  
 //my_sem = find_my_sem(c_node, my_pid); 
 
 my_sem = currentThread->my_sem; 
 
-//printf("estoy por meter el semaforo con indice : %s a la lista \n", my_sem->getName()); 
-
 process_threads->Append(my_sem); 	 
 
 my_sem->setValue(my_sem->getValue()-1);			//el semaforo al crearse tiene 1 de valor, ahora quiero esperar 1 hilo, entonces lo decremento.  
 
-printf("soy el hilo : %s - entrando al semaforo\n", my_sem->getName()); 
+printf("Thread # %s  arrived at the semaphore\n", my_sem->getName()); 
 
 my_sem->P(); 									//voy a esperar y me tengo que quedar en el semaforo, hasta que alguien me haga signal. 
 
@@ -210,7 +198,7 @@ void NachOS_Exit() {		// System call 1
 	ThreadStatus exitStatus = (ThreadStatus)machine->ReadRegister(4);
 	int threadId = currentThread->get_pid();
 
-	printf("soy el hilo/proceso : %d y estoy saliendo \n", currentThread->get_pid());
+	printf("Thread # %d - finishing \n", currentThread->get_pid());
 	
 	ListElement<father_son_t*>* node_c = waiting_list->head(); 
 	int counter = 0; 
@@ -218,26 +206,23 @@ void NachOS_Exit() {		// System call 1
 		++counter; 
 		node_c = node_c->next; 
 	}
-	//	printf("longitud de waiting list : %d \n", counter);  
 	
-	
-	//if (!currentThread->space->am_I_process()) {			//si no soy un proceso, soy un hilo. 
+	//if (!currentThread->space->am_I_process()) { //pueden haber procesos que esperan procesos. 
 		ListElement<father_son_t*>* c_node = waiting_list->head(); 
 		int who = is_someone_waiting_for_me(c_node, currentThread->get_pid()); 
 		
 		if (-1 != who) {
-			printf("soy el hilo : %d y me esta esperando el hilo/proceso : %d \n", currentThread->get_pid(), who); 
+			printf("Thread # %d - Thread # %d is waiting for me\n", currentThread->get_pid(), who); 
 			Semaphore* sem = find_my_sem(process_threads->head(), who); 
-			//printf("seleccione el semaforo : %s \n", sem->getName()); 
-			printf("liberandolo ... \n"); 
+			printf("releasing it ... \n"); 
 			sem->V(); 
 		}
 		else {
-			printf("soy el hilo/proces : %d y nadie me esta esperando \n", currentThread->get_pid()); 
+			printf("Thread # %d - nobody is waiting for me \n", currentThread->get_pid()); 
 			//nadie me esta esperando. 
 		}
 	//}
-	//else {													//por ser proceso, no tengo que esperar a nadie, ni siquiera busco. 
+	//else {
 		//nadie me puede esperar. 
 	//}
 
@@ -248,10 +233,7 @@ void NachOS_Exit() {		// System call 1
  
 
 //void NachosForkThread( int p ) { // for 32 bits version
- void NachosForkThread( void * p ) { // for 64 bits version
-    //printf("NachosForkThread\n");    
-    //printf("ESTOY EN NACHOS_FORK_THREAD\n"); 
-    
+ void NachosForkThread( void * p ) { // for 64 bits version    
     AddrSpace *space;
 
     space= currentThread->space;
@@ -265,9 +247,7 @@ void NachOS_Exit() {		// System call 1
     machine->WriteRegister( PCReg, (long) p );
     machine->WriteRegister( NextPCReg, (long) p + 4 );
 
-    machine->Run();                     // jump to the user progam
-
-    //printf("SALIENDO DE NACHOS_FORK_THREAD\n");    
+    machine->Run();                     // jump to the user progam  
     ASSERT(false);
 }
 
@@ -275,32 +255,22 @@ void NachOS_Exit() {		// System call 1
  *  System call interface: void Fork( void (*func)() )
  */
 void NachOS_Fork() {		// System call 9
-   
-   
    DEBUG( 'u', "Entering Fork System call\n" );
-   //printf("ESTOY EN NACHOS_FORK()\n "); 
    
    //int id = currentThread->get_pid();
    //char * myId = (char *)calloc(20,sizeof(char));
    //sprintf(myId,"%d",id);
-   //Semaphore * sem = new Semaphore(myId,1);	//cada proceso/hilo que ejecuta fork, va a necesitar un semaforo, se usa solo si hace join. 
+   //Semaphore * sem = new Semaphore(myId,1);
    //currentThread->my_sem = sem;
-
 	//ahora el semaforo se crea en la clase thread de una vez. 
-   //process_threads->Append(currentThread->my_sem); 	 			//lista de semaforos, cada semaforo tiene de nombre el mismo id del hilo. 
+   //process_threads->Append(currentThread->my_sem);
    
 	Thread * newT = new Thread("Child");
-    
-    //printf("soy el hilo/proceso :%d y estoy por copiarle mi addrSpace a mi hijo \n", currentThread->get_pid());   
-	
+
 	newT->space = new AddrSpace( currentThread->space );
 	
    newT->Fork((VoidFunctionPtr)NachosForkThread, (void*)machine->ReadRegister(4));
-   
-   //printf("SALIENDO DE NACHOS_FORK()\n");
-   
-   //machine->WriteRegister(2,newT->get_pid());	//pasarle al padre el id del hijo. 
- 
+  
 }
 
 /*
@@ -324,16 +294,7 @@ void NachOS_Open() {		// System call 5
  
  
  
-//NOTA PARA WRITE 
-//El método ReadMem solo puede leer enteros, ver el tercer parámetro, por lo que se recomienda que las tiras de caracteres 
-//se lean caracter por caracter (for) e irlas almacenando en una variable local, por ejemplo, char buffer[ 100 ];  
- 
-void NachOS_Write() {		// System call 6
-	//char buffer;
-//machine -> ReadRegister(X) // x = lee el registro 4(x) //devuelve un indice de la memoria de usuario 
-//machine -> ReadMem(addres(registro X), cuantos caracteres leer (1), a donde se va a guardar ) //directorio machine, lee 1 byte a la vez, se usa para traer datos de la memori
-		//Readmem(4,1,&buffer); se lee 1 caracter del registro 4  // 'a'
-	
+void NachOS_Write() {		// System call 6	
 	int addr, count;
 	int file = 0; 
    addr = machine->ReadRegister( 4 );
@@ -411,7 +372,6 @@ void NachOS_Read() {		// System call 7
    int addr, count;
 	int file = 0; 
    addr = machine->ReadRegister( 4 );
-   printf("Addr: %d\n", addr);
    count = machine->ReadRegister( 5 );
    
    file = machine->ReadRegister( 6 );
@@ -433,8 +393,6 @@ void NachOS_Read() {		// System call 7
          machine->WriteMem( addr+index, 1, val);
       }
    }
-      
-   printf("Read result: %d\n", r);
    machine->WriteRegister(2, r);
 }
 
@@ -450,14 +408,6 @@ void NachOS_Close() {		// System call 8
         perror("close");
 }
 
-
-
-/*
-The exact behavior of this function depends on the implementation, in particular on the mechanics of the OS scheduler in use and the
-*  state of the system. For example, a first-in-first-out realtime scheduler (SCHED_FIFO in Linux) would suspend the current thread 
-* and put it on the back of the queue of the same-priority threads that are ready to run (and if there are no other threads at the same priority,
-*  yield has no effect). 
-*/
 
 /*
  *  System call interface: void Yield()
@@ -607,22 +557,14 @@ void NachOS_Connect() {		// System call 31
 		c_data[0] = *(char*)buffer; 
 	} 
 
-   //printf("Hostip: %s\n", hostip);
-
    int port = machine->ReadRegister( 6 );
 
    int sockSize = sizeof(struct sockaddr_in);
    struct sockaddr_in addr;
-   //struct sockaddr_in * addr = (sockaddr_in *) calloc(1, sockSize);
 
    addr.sin_family = AF_INET;
    addr.sin_port = htons(port);
 
-   // if (inet_pton(AF_INET, hostip, &(addr->sin_addr)) <= 0)
-   //  {
-   //      printf("Direccion Invalida. Direccion no soportada.\n");
-   //  }
-   //addr->sin_addr.s_addr = inet_addr(hostip);
    inet_aton( hostip, & addr.sin_addr ); 
 
    int result = connect(idSocket, (struct sockaddr *) &addr, sockSize);

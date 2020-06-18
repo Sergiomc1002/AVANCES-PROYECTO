@@ -1,29 +1,10 @@
 #include "syscall.h"
 
-
-//#define PINGPONG true
-
 void SimpleThread(int);
 
 int main( int argc, char * argv[] ) {
 	
-	//int my_id = currentThread->get_pid(); 
-	
-   
-
-	//FORK deberia retonarme el id, para saber a quien tengo que esperar. 
-
-	//char msg[100]; 
-	//snprintf(msg, sizeof(msg), "id del hijo : %d \n", child_id);
-
-#ifdef PINGPONG
 	Fork(SimpleThread);
-#endif
-
-	//int child_id = machine->ReadRegister(2); 
-
-	//Join(child_id); 		//primero se iria a dormir, y luego ejecutaria SimpleThread, por lo que el hijo deberia imprimir primero. 
-	
 
 	SimpleThread(1);
 
@@ -36,7 +17,6 @@ int main( int argc, char * argv[] ) {
 
 void SimpleThread(int num)
 {
-    //Write("ST\n", 3, 1);
     if (num == 1) {
 	for (num = 0; num < 5; num++) {
 		Write("HOLAA\n", 7, 1);

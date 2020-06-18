@@ -15,7 +15,6 @@
 
 #include "copyright.h"
 #include "filesys.h"
-//#include "bitmap.h"
 
 #define UserStackSize		1024 	// increase this as necessary!
 
@@ -36,13 +35,11 @@ class AddrSpace {
 	int GetUninitSize();
 	int GetDataSize();
 	int GetTextSize();
-	//Semaphore* get_semaphore(); 
 	void deleteAddrspace();
 	
 	bool am_I_process(); 
 	
 	public:
-	//Semaphore* semaphore; 
 	
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation
