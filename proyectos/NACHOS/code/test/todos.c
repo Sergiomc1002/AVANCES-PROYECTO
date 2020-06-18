@@ -1,5 +1,5 @@
 #include "syscall.h"
-
+#include "synch.h"
 int resultado;
 char Salida[10];
 

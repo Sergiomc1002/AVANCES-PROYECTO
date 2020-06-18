@@ -165,6 +165,9 @@ class Barrier {
       void Wait();
    private:
       char * name;
+	  Semaphore * sem;
+	  int value;
+	  int initialValue = 0;
       // plus some other stuff you'll need to define
 };
 

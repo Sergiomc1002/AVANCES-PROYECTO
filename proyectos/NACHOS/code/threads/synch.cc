@@ -208,16 +208,23 @@ void Mutex::Unlock() {
 
 // Barrier class
 Barrier::Barrier( const char * debugName, int count ) {
-
+	value = count;
+	this->sem = new Semaphore(debugName,0);
 }
 
 Barrier::~Barrier() {
-
-
+	delete sem;
 }
 
 void Barrier::Wait() {
-
-
+	initialValue++; //llego otro hilo a este punto, aumenta la variable
+	if(initialValue == value){ //si este hilo es el ultimo en llegar, libera a todos los demas hilos de la cola de espera (n-1)
+		for(int i = 0; i < (value -1); ++i){
+			sem->V();
+		}
+	}
+	else{
+		sem->P(); //si no han llegado todos los hilos a este punto, hace esperar al que llega
+	}
 }
 
