@@ -317,10 +317,9 @@ void
 ThreadTest()
 {
 	//test_sema_mutex_lock(); 
-	
-	//test_producer_consumer(); 
-	//barrierTest();
-	lockTest();
+	//test_producer_consumer(); //PRUEBA DE VARIABLE DE CONDICION
+	barrierTest(); //PRUEBA DE BARRIER
+	//lockTest(); //PRUEBA DE LOCK
 }
 
 

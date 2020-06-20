@@ -513,6 +513,8 @@ void NachOS_CondBroadcast() {		// System call 23
  *  System call interface: Socket_t Socket( int, int )
  */
 //TEst
+//parametro 1: dominio (ipv4)
+//parametro 2: tipo(stream)
 void NachOS_Socket() {			// System call 30
    int domain = machine->ReadRegister( 4 );
    int type = machine->ReadRegister( 5 );
