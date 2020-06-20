@@ -135,21 +135,24 @@ Lock::Lock(const char* debugName) {
 
 Lock::~Lock() {
 	delete semaphore;
+	delete name;
 }
 
 
 void Lock::Acquire() {
 	semaphore->P();
+	threadId = currentThread->get_pid();
 }
 
 
 void Lock::Release() {
-	semaphore->V(); 
+	if (isHeldByCurrentThread())
+		semaphore->V(); 
 }
 
 
 bool Lock::isHeldByCurrentThread() {
-   return false;
+   return currentThread->get_pid() == threadId;
 }
 
 
@@ -222,6 +225,7 @@ void Barrier::Wait() {
 		for(int i = 0; i < (value -1); ++i){
 			sem->V();
 		}
+		initialValue = 0;
 	}
 	else{
 		sem->P(); //si no han llegado todos los hilos a este punto, hace esperar al que llega

@@ -65,12 +65,14 @@ THREAD_C =../threads/main.cc\
 	../machine/stats.cc\
 	../machine/timer.cc\
 	../threads/preemptive.cc\
-	../threads/PRUEBA.cpp
+	../threads/PRUEBA.cpp\
+	../threads/barriertest.cc\
+	../threads/locktest.cc
 
 THREAD_S = ../threads/switch.s
 
 THREAD_O =main.o scheduler.o synch.o system.o thread.o \
-	utility.o threadtest.o interrupt.o stats.o sysdep.o timer.o \
+	utility.o threadtest.o barriertest.o locktest.o interrupt.o stats.o sysdep.o timer.o \
 	preemptive.o dinningph.o PRUEBA.o
 
 USERPROG_H = ../userprog/addrspace.h\

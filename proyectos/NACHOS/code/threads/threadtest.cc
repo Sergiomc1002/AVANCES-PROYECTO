@@ -310,13 +310,17 @@ SimpleThread(void* name)
 //	SimpleThread ourselves.
 //----------------------------------------------------------------------
 
+extern int barrierTest();
+extern int lockTest();
+
 void
 ThreadTest()
 {
 	//test_sema_mutex_lock(); 
 	
-	test_producer_consumer(); 
-	
+	//test_producer_consumer(); 
+	//barrierTest();
+	lockTest();
 }
 
 
