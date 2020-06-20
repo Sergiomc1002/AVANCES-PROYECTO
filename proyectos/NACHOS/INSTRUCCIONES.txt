@@ -1,0 +1,43 @@
+Para compilar NachOS:
+	Abrir terminal en la carpeta "code"
+	Ejecutar: make 
+
+Para correr los programas de prueba de sincronizacion:
+
+	Si quiere ejecutar la prueba del Barrier:
+		Abrir threadtest.cc
+		Comentar todas las lineas dentro del metodo "ThreadTest()"
+		Descomentar la linea 321
+		En la terminal de la carpeta "threads" ejecutar: make
+		Y despues ejecutar de nuevo: ./nachos
+		Con esto se mostrara el caso de prueba del lock
+
+
+	Si quiere ejecutar la prueba de el Lock:
+		Abrir threadtest.cc
+		Comentar todas las lineas dentro del metodo "ThreadTest()"
+		Descomentar la linea 322
+		En la terminal de la carpeta "threads" ejecutar: make
+		Y despues ejecutar de nuevo: ./nachos
+		Con esto se mostrara el caso de prueba del lock
+
+	Para correr la prueba de Variable de condicion:
+	
+		Abrir threadtest.cc
+		Comentar todas las lineas dentro del metodo "ThreadTest()"
+		Descomentar la linea 320
+		En la terminal de la carpeta "threads" ejecutar: make
+		Y despues ejecutar de nuevo: ./nachos
+	
+
+Para correr la prueba de Fork, Yield y Exit:
+	Abrir una terminal en la carpeta "userprog"
+	Ejecutar: ./nachos -x ../test/pingPong
+
+Para correr la prueba de Exec y Join:
+	Abrir una terminal en la carpeta "userprog"
+	Ejecutar: ./nachos -x ../test/test_exec_join
+
+Para correr la prueba del cliente de NachOS:
+	Abrir una terminal en la carpeta "userprog"
+	Ejecutar: ./nachos -x ../test/client
