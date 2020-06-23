@@ -287,3 +287,15 @@ int Socket::Shutdown(int client_id) {
 	return close(this->client_id);
 }
 
+
+int Socket::recvFrom(void* buffer, int len_buffer, void* sockaddr) {
+	socklen_t size = sizeof(struct sockaddr); 
+	return recvfrom (this->id, buffer, len_buffer, 0, (struct sockaddr *) sockaddr, &size);	
+}
+
+ 
+int Socket::sendTo(void* msg, int len_msg, void* sockaddr) {
+	socklen_t size = sizeof(struct sockaddr); 
+	return sendto (this->id, msg, len_msg, 0, (struct sockaddr *) & sockaddr, size);
+}
+

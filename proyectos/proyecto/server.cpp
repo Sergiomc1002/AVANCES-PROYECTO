@@ -91,43 +91,67 @@ void* run(void* data) {
 
 
 int main(int argc, char* argv[]) {
+
+
+	Socket server_socket('d', false);
+	if (-1 == server_socket.Bind(SERVER_PORT, 0)) {
+		perror("something went wrong \n"); 
+	}
 	
-Socket server_socket('s', false);
-
-if(-1 == server_socket.Bind(SERVER_PORT, 0)){ // 0 = ipv4.
-perror("there was an error");
-}
-
-
-if(-1 == server_socket.Listen(10)) { 
-perror("there was an error");
-}
-
-
-int contador_threads = 0; 
-
-while(1) {
-
-	struct sockaddr_in socket_client;
-
-	int client_id = server_socket.Accept(&socket_client);
+	struct sockaddr s_addr; 
+	memset(&s_addr, 0, sizeof(s_addr));
 	
-	if (-1 == client_id) {
+	char* buffer = (char*)calloc(1024, sizeof(char));
+	
+	int bytes_rcv = server_socket.recvFrom((void*) buffer, 1024, (void*)&s_addr);
+	buffer[bytes_rcv] = '\0'; 
+	printf("mensaje del cliente : %s \n", buffer);
+	
+	
+	char* msg = (char*)"soy el server y recibi el mensaje \n";
+	if (-1 == server_socket.sendTo((void*)msg, strlen(msg), (void*)&s_addr)) {
 		perror("something went wrong");
+	}    
+
+
+#if 0	
+	Socket server_socket('s', false);
+
+	if(-1 == server_socket.Bind(SERVER_PORT, 0)){ // 0 = ipv4.
+	perror("there was an error");
 	}
-	else {
-		thread_data_t* thread_data = (thread_data_t*)calloc(1,sizeof(thread_data_t)); 		//hay que darle free a esto. 
-		thread_data->server_socket = &server_socket;
-		thread_data->client_id = client_id;  
-		thread_data->thread_id = ++contador_threads; 
-		pthread_t* thread = (pthread_t*)malloc(1*sizeof(pthread_t)); 
 
-		pthread_create(thread, NULL, run, thread_data); 
+
+	if(-1 == server_socket.Listen(10)) { 
+	perror("there was an error");
 	}
-}
 
-//server_socket.Shutdown(client_id); 
 
+	int contador_threads = 0; 
+
+	while(1) {
+
+		struct sockaddr_in socket_client;
+
+		int client_id = server_socket.Accept(&socket_client);
+		
+		if (-1 == client_id) {
+			perror("something went wrong");
+		}
+		else {
+			thread_data_t* thread_data = (thread_data_t*)calloc(1,sizeof(thread_data_t)); 		//hay que darle free a esto. 
+			thread_data->server_socket = &server_socket;
+			thread_data->client_id = client_id;  
+			thread_data->thread_id = ++contador_threads; 
+			pthread_t* thread = (pthread_t*)malloc(1*sizeof(pthread_t)); 
+
+			pthread_create(thread, NULL, run, thread_data); 
+		}
+	}
+
+	//server_socket.Shutdown(client_id); 
+
+#endif
 
 return 0;
 }

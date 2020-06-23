@@ -21,6 +21,9 @@ class Socket{
         void SetIDSocket( int );
         int Shutdown(int client_id); 
         int Shutdown(); 
+        int recvFrom(void* buffer, int len_bufer, void* sockaddr); 
+        int sendTo(void* msg, int len_msg, void* sockaddr); 
+        
         
     private:
         int id;

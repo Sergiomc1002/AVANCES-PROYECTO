@@ -7,9 +7,12 @@
 #include "socket.h"
 #include <fcntl.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 #include <iostream>
 using namespace std;
 
+
+#define PORT 7002
 
 int main( int argc, char * argv[] ) {
 
@@ -21,6 +24,31 @@ int main( int argc, char * argv[] ) {
 //./client 163.178.104.187/ci0123/LogoECCI.png
 
 
+	Socket s('d', false);
+	struct sockaddr_in s_addr;
+	memset(&s_addr, 0, sizeof(s_addr)); 
+	
+	s_addr.sin_family = AF_INET;
+	s_addr.sin_port = htons(PORT); 
+	s_addr.sin_addr.s_addr = INADDR_ANY; 
+	
+	char* msg = (char*)"me cago en la pta\n";
+	
+	if (-1 == s.sendTo((void*)msg, strlen(msg), (void*)&s_addr)) {
+		perror("something went wrong"); 
+	}
+	
+	char* buffer = (char*)calloc(1024, sizeof(char));  
+	
+	int bytes_rcv = s.recvFrom((void*)buffer, 1024, (void*)&s_addr); 
+	buffer[bytes_rcv] = '\0'; 
+	printf("el server dice : %s \n", buffer); 
+
+
+
+
+
+	#if 0
 	Socket s( 's', false);
 	char* request = argv[1]; 
 	data_arguments_t *start_values = (data_arguments_t*)calloc(1, sizeof(data_arguments_t)); 
@@ -74,12 +102,11 @@ int main( int argc, char * argv[] ) {
 		}
 		
 	}
-
-
-
 	close(id_file); 	
-	
+	#endif
 	
 	//free_initial_values(start_values); 
+   
+   
    
 }
