@@ -219,8 +219,44 @@ int Socket::Bind( int port, int server_client) {
     return status_bind;
 }
 
+int Socket::ReceiveFrom(sockaddr_in * addr, char* buffer, int bufflen)
+{
+    int n = -1;
+    socklen_t len = sizeof(addr);
+    memset(addr, 0, len);
+    n = recvfrom(id, buffer, bufflen, MSG_WAITALL, (struct sockaddr *)addr, &len);
+    if (n == -1) 
+    {
+        perror("receiveFrom");
+    }
+
+    return n;
+}
 
 
+int Socket::SendTo(sockaddr_in * addr, char* address, int port, char *msg, int msglen) 
+{
+    int n = -1;
+    int addrsize = sizeof(sockaddr_in);
+
+    memset(addr, 0, addrsize);
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons(port);
+    addr->sin_addr.s_addr = INADDR_ANY;
+    // if (inet_aton(address, &addr.sin_addr) == 0)
+    // {
+    //     printf("sendto: could not convert address: %s\n", address);
+    //     return n;
+    // }
+
+    n = sendto(id, msg, msglen, MSG_CONFIRM, (const struct sockaddr *)addr, addrsize);
+    if (n == -1)
+    {
+        perror("sendTo");
+    }
+
+    return n;
+}
 
 int Socket::Accept(struct sockaddr_in* client_socket) {
 		
@@ -285,17 +321,5 @@ int Socket::Shutdown() {
 int Socket::Shutdown(int client_id) {
 	printf("CONECTION CLOSED");
 	return close(this->client_id);
-}
-
-
-int Socket::recvFrom(void* buffer, int len_buffer, void* sockaddr) {
-	socklen_t size = sizeof(struct sockaddr); 
-	return recvfrom (this->id, buffer, len_buffer, 0, (struct sockaddr *) sockaddr, &size);	
-}
-
- 
-int Socket::sendTo(void* msg, int len_msg, void* sockaddr) {
-	socklen_t size = sizeof(struct sockaddr); 
-	return sendto (this->id, msg, len_msg, 0, (struct sockaddr *) & sockaddr, size);
 }
 

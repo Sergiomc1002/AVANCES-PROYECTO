@@ -19,11 +19,12 @@ class Socket{
         int Accept(struct sockaddr_in* client_socket);	
         int Accept(struct sockaddr_in6* client_socket_ipv6); 
         void SetIDSocket( int );
+
+        int ReceiveFrom(sockaddr_in * addr, char* buffer, int bufflen);
+        int SendTo(sockaddr_in * addr, char* address, int port, char *msg, int msglen);
+
         int Shutdown(int client_id); 
         int Shutdown(); 
-        int recvFrom(void* buffer, int len_bufer, void* sockaddr); 
-        int sendTo(void* msg, int len_msg, void* sockaddr); 
-        
         
     private:
         int id;

@@ -11,6 +11,11 @@ typedef struct {
 	
 }data_arguments_t; 
 
+typedef struct {			//los balanceadores en el protocolo me mandan su IP con su puerto, entonces utilizo esta struct. 
+	char* ip_address; 
+	int port; 
+}ip_port_t; 
+
 extern void set_initial_values(data_arguments_t *data_arguments, char* request); 
 
 extern void free_initial_values(data_arguments_t* data_arguments); 
@@ -34,3 +39,5 @@ extern char* get_extension_filename(char* filename);
 extern char* extract_name(char * name);
 
 extern bool es_directorio(char * filename);
+
+extern ip_port_t* build_ip_port(char* msg); 

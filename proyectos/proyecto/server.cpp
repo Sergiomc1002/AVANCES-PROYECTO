@@ -9,8 +9,9 @@
 #include <queue>
 #include <arpa/inet.h>
 #include "http_parser.h"
+#include <list>
 #define SERVER_PORT 7002
-
+#define B_PORT 65000
 
 
 typedef struct {
@@ -18,6 +19,39 @@ Socket *server_socket;
 int client_id;
 int thread_id; 
 }thread_data_t;
+
+
+typedef struct {
+	std::list<ip_port_t*> * balancers; 
+	Socket *b_socket; 
+} listener_data_t; 
+
+
+
+void* listen_balancers(void* data) {
+	listener_data_t* listener_data = (listener_data_t*)data; 
+	Socket* b_socket = listener_data->b_socket; 
+	std::list<ip_port_t*> * balancers = listener_data->balancers; 
+	
+	b_socket->Bind(B_PORT, 0);
+
+
+	sockaddr_in s_in;
+	char buffer[120];
+
+	int n = b_socket->ReceiveFrom(&s_in, buffer, 120);
+
+	if (n != -1) {
+		
+		ip_port_t* balancer = build_ip_port(buffer); 
+		printf("ip : %s - port : %d \n", balancer->ip_address, balancer->port); 
+		balancers->push_back(balancer);  			
+			
+	}	
+	else {
+		printf("Error al recibir mensaje.\n");
+	}
+}
 
 
 void* run(void* data) { 
@@ -91,28 +125,20 @@ void* run(void* data) {
 
 
 int main(int argc, char* argv[]) {
+	
+	pthread_t listener_balancers; 
+	listener_data_t listener_data; 
+	memset(&listener_data, 0, sizeof(listener_data_t));
+	Socket b_socket('d', false);
+	std::list<ip_port_t*> balancers;	 
+	listener_data.balancers = &balancers; 
+	listener_data.b_socket = &b_socket;
+	 
 
-
-	Socket server_socket('d', false);
-	if (-1 == server_socket.Bind(SERVER_PORT, 0)) {
-		perror("something went wrong \n"); 
-	}
+	pthread_create(&listener_balancers, NULL, listen_balancers, (void*)&listener_data); 
 	
-	struct sockaddr s_addr; 
-	memset(&s_addr, 0, sizeof(s_addr));
-	
-	char* buffer = (char*)calloc(1024, sizeof(char));
-	
-	int bytes_rcv = server_socket.recvFrom((void*) buffer, 1024, (void*)&s_addr);
-	buffer[bytes_rcv] = '\0'; 
-	printf("mensaje del cliente : %s \n", buffer);
-	
-	
-	char* msg = (char*)"soy el server y recibi el mensaje \n";
-	if (-1 == server_socket.sendTo((void*)msg, strlen(msg), (void*)&s_addr)) {
-		perror("something went wrong");
-	}    
-
+	//este join iria al  puro final. 
+	pthread_join(listener_balancers, NULL); 
 
 #if 0	
 	Socket server_socket('s', false);
@@ -121,11 +147,9 @@ int main(int argc, char* argv[]) {
 	perror("there was an error");
 	}
 
-
 	if(-1 == server_socket.Listen(10)) { 
 	perror("there was an error");
 	}
-
 
 	int contador_threads = 0; 
 
@@ -149,9 +173,10 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	
+
 	//server_socket.Shutdown(client_id); 
 
-#endif
-
+#endif 
 return 0;
 }
