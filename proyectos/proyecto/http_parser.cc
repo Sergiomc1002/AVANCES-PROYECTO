@@ -417,8 +417,10 @@ int get_http_status(char* response_header, int read_status) {
 ip_port_t* build_ip_port(char* msg) {
 	
 	//    "B/C/192.168.0.69/65000"
+	// uffer: S/C/127.0.0.1/65000
+
 	ip_port_t* balancer = (ip_port_t*)calloc(1, sizeof(ip_port_t));
-	if ((*msg == 'B' | *msg == 'S') && (*msg+2 == 'C' | *msg+2 == 'D')) {
+	if ((*msg == 'B' || *msg == 'S') && (*(msg+2) == 'C' || *(msg+2) == 'D')) {
 		char* ip_address = (char*)calloc(30, sizeof(char));
 		char port[10];
 		memset(port, 0, 10);  
@@ -437,9 +439,11 @@ ip_port_t* build_ip_port(char* msg) {
 			++index_msg; 
 		}
 		balancer->ip_address = ip_address; 
-		balancer->port = atoi(port); 
+		balancer->port = atoi(port);
+		return balancer; 
 	}
 	else {
 		printf("el mensaje del balanceador es incorrecto"); 
+		return NULL;
 	}
 } 

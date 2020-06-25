@@ -23,23 +23,27 @@ int thread_id;
 
 typedef struct {
 	std::list<ip_port_t*> * balancers; 
-	Socket *b_socket; 
+	Socket * r_socket; 
+	Socket * s_socket; 
 } listener_data_t; 
 
 
 
 void* listen_balancers(void* data) {
 	listener_data_t* listener_data = (listener_data_t*)data; 
-	Socket* b_socket = listener_data->b_socket; 
+	Socket* r_socket = listener_data->r_socket; 
+	Socket* s_socket = listener_data->s_socket; 
 	std::list<ip_port_t*> * balancers = listener_data->balancers; 
 	
-	b_socket->Bind(B_PORT, 0);
-
-
 	sockaddr_in s_in;
 	char buffer[120];
 
-	int n = b_socket->ReceiveFrom(&s_in, buffer, 120);
+	char * balancer_seek_msg = (char *)"S/C/127.0.0.1/65000";
+
+	int n = s_socket->SendTo(&s_in, "", B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
+
+	r_socket->Bind(B_PORT + 1, 0);
+	n = r_socket->ReceiveFrom(&s_in, buffer, 120);
 
 	if (n != -1) {
 		
@@ -129,10 +133,12 @@ int main(int argc, char* argv[]) {
 	pthread_t listener_balancers; 
 	listener_data_t listener_data; 
 	memset(&listener_data, 0, sizeof(listener_data_t));
-	Socket b_socket('d', false);
+	Socket r_socket('d', false);
+	Socket s_socket('d', false);
 	std::list<ip_port_t*> balancers;	 
 	listener_data.balancers = &balancers; 
-	listener_data.b_socket = &b_socket;
+	listener_data.r_socket = &r_socket;
+	listener_data.s_socket = &s_socket;
 	 
 
 	pthread_create(&listener_balancers, NULL, listen_balancers, (void*)&listener_data); 

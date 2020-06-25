@@ -222,7 +222,7 @@ int Socket::Bind( int port, int server_client) {
 int Socket::ReceiveFrom(sockaddr_in * addr, char* buffer, int bufflen)
 {
     int n = -1;
-    socklen_t len = sizeof(addr);
+    socklen_t len = sizeof(sockaddr_in);
     memset(addr, 0, len);
     n = recvfrom(id, buffer, bufflen, MSG_WAITALL, (struct sockaddr *)addr, &len);
     if (n == -1) 

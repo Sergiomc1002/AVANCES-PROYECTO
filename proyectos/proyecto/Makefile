@@ -3,8 +3,8 @@ output: client server balanceador
 server: server.o socket.o http_parser.o
 	g++ server.o socket.o http_parser.o -o server -lpthread
 	
-balanceador: balanceador.o socket.o
-	g++ balanceador.o socket.o -o balanceador
+balanceador: balanceador.o socket.o http_parser.o
+	g++ balanceador.o socket.o http_parser.o -o balanceador -lpthread
 
 client: client.o socket.o http_parser.o
 	g++ client.o socket.o http_parser.o -o client
