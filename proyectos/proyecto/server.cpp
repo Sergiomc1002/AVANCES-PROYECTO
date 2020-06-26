@@ -10,15 +10,8 @@
 #include <arpa/inet.h>
 #include "http_parser.h"
 #include <list>
-#define SERVER_PORT 7002
+#define SERVER_PORT 7000
 #define B_PORT 65000
-
-
-typedef struct {
-Socket *server_socket;
-int client_id;
-int thread_id; 
-}thread_data_t;
 
 
 typedef struct {
@@ -27,7 +20,11 @@ typedef struct {
 	Socket * s_socket; 
 } listener_data_t; 
 
-
+typedef struct {
+	Socket *server_socket;
+	int client_id;
+	int thread_id; 
+} thread_data_t;
 
 void* listen_balancers(void* data) {
 	listener_data_t* listener_data = (listener_data_t*)data; 
@@ -38,7 +35,7 @@ void* listen_balancers(void* data) {
 	sockaddr_in s_in;
 	char buffer[120];
 
-	char * balancer_seek_msg = (char *)"S/C/127.0.0.1/65000";
+	char * balancer_seek_msg = (char *)"S/C/127.0.0.1/7000";
 
 	int n = s_socket->SendTo(&s_in, "", B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
 
@@ -50,7 +47,8 @@ void* listen_balancers(void* data) {
 		ip_port_t* balancer = build_ip_port(buffer); 
 		printf("ip : %s - port : %d \n", balancer->ip_address, balancer->port); 
 		balancers->push_back(balancer);  			
-			
+		// send	
+		n = s_socket->SendTo(&s_in, "", B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
 	}	
 	else {
 		printf("Error al recibir mensaje.\n");
@@ -146,7 +144,7 @@ int main(int argc, char* argv[]) {
 	//este join iria al  puro final. 
 	pthread_join(listener_balancers, NULL); 
 
-#if 0	
+#if 1
 	Socket server_socket('s', false);
 
 	if(-1 == server_socket.Bind(SERVER_PORT, 0)){ // 0 = ipv4.

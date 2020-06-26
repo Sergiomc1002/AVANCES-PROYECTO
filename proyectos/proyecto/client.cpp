@@ -16,7 +16,7 @@ int main( int argc, char * argv[] ) {
 //examples how to run the program
 //./client 163.178.104.187:80/RioCeleste-VolcanTenorio.jpg
 //./client 163.178.104.81	-> ecci
-//./cient 163.178.104.187/index.html
+//./client 163.178.104.187/index.html
 //./client 163.178.104.187/ci0123/ProyectoProgramado.pdf 
 //./client 163.178.104.187/ci0123/LogoECCI.png
 
