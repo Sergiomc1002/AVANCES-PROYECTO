@@ -81,6 +81,7 @@ void* listen_servers(void * args)
 
 void * sendToServer(void * args)
 {
+	Socket server_socket('s',false);
     char* msg_from_client = (char*)calloc(512, sizeof(char));  
 
 	sthread_data* thread_data = (sthread_data*)args;
@@ -96,17 +97,17 @@ void * sendToServer(void * args)
     //ip_port_t * server = chooseServer();
     ip_port_t * server = *(server_list->begin());
 
-    int server_connect = s->Connect(server->ip_address, server->port);
-    s->Write(msg_from_client);
-
+	int server_connect = server_socket.Connect(server->ip_address, server->port);
+	server_socket.Write(msg_from_client);
+	
     bool f_exit = false;
     int read_status = 0; 
     int bytes_read = 0; 
     char* response = (char*)calloc(1024, sizeof(char));
-    while((read_status = s->Read(response, 1024)) > 0 && !f_exit) {
+    while((read_status = server_socket.Read(response, 1024)) > 0 && !f_exit) {
 		s->Write(response, thread_data->client_id,read_status);
 	}
-
+	int asd = server_socket.Shutdown();
 }
 
 int main()

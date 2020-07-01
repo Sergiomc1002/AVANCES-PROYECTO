@@ -27,9 +27,11 @@ int main( int argc, char * argv[] ) {
 	set_initial_values(start_values, request); 
 	char* file = (char*)calloc(100, sizeof(char)); 
 	char* name = extract_name(start_values->filename); //recibe el nombre.extension
+	printf("NAME: %s\n",name);
 	int id_file;     	
 	strcpy(file, name);
 	request = make_request_header(start_values->filename);
+	//request = 
 	printf("REQUEST:  %s\n",request);
 	int status_connect = s.Connect(start_values->ip_address, start_values->server_port );
 	int write_status = s.Write(request);
@@ -51,8 +53,11 @@ int main( int argc, char * argv[] ) {
 		}
 		else {	
 			if ((status_http_protocol = get_http_status(response, read_status)) == 1) {	
-				char* extension = get_file_extension(response); 
-				strcat(file, extension); 
+				char* extension = get_file_extension(response);
+				printf("EXTENSION: %s\n",extension);
+				strcat(file, extension);
+				printf("FILE: %s\n",file);
+				
 				id_file = creat(file, S_IRUSR | S_IWUSR);				
 				start_data = get_index_start_data(response, read_status); 
 				int diference = read_status - start_data; 	 
@@ -64,8 +69,9 @@ int main( int argc, char * argv[] ) {
 				f_exit = true; 
 			}				
 		}
+		
 	}
-
+	//printf("HOLA\n");
 
 	if (status_http_protocol != 1) {			//ocurrio un error. 
 		printf("something went wrong\n"); 

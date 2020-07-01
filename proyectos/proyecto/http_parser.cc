@@ -345,6 +345,7 @@ void free_initial_values(data_arguments_t* data_arguments) {
 505 HTTP Version Not Supported 	The server does not support the "http protocol" version.
 */
 char* extract_name(char * address){
+	printf("%s\n",address);
 	bool pare = false;
 	int contador = 0;
 	char* buf = new char[100];
@@ -352,10 +353,10 @@ char* extract_name(char * address){
 	int length = strlen(address);
 	if(length > 0){
 		while(contador < length){
-		if(address[contador] == '/'){
-			index = contador;
-		}
-		contador++;
+			if(address[contador] == '/'){
+				index = contador;
+			}
+			contador++;
 		}
 		contador = 0;
 		if(index != -1){
@@ -373,7 +374,17 @@ char* extract_name(char * address){
 			}
 		}	
 		else{
-			printf("ERROR");
+			contador = 0;
+			while(contador < length){
+				if(address[contador] == '.'){
+					buf[contador] = address[contador];
+					break;
+				}
+				else{
+					buf[contador] = address[contador];
+				}
+				contador++;
+			}
 		}
 			
 	}
