@@ -122,6 +122,7 @@ void * sendToServer(void * args)
 		}
 		
 		server_socket.Shutdown();
+		s->Shutdown(thread_data->client_id); 
 		
 	}
 	else {

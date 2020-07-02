@@ -69,7 +69,7 @@ int main( int argc, char * argv[] ) {
 		}
 		printf("read status : %d \n", read_status); 
 	}
-	printf("FILE BUILT"); 
+	printf("FILE BUILT\n"); 
 	//printf("HOLA\n");
 
 	if (status_http_protocol != 1) {			//ocurrio un error. 
