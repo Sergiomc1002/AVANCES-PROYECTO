@@ -458,3 +458,9 @@ ip_port_t* build_ip_port(char* msg) {
 		return NULL;
 	}
 } 
+
+
+bool is_it_a_connect_msg(char* msg) {
+	
+	return true; 	
+}

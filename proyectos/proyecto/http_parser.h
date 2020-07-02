@@ -41,3 +41,5 @@ extern char* extract_name(char * name);
 extern bool es_directorio(char * filename);
 
 extern ip_port_t* build_ip_port(char* msg); 
+
+extern bool is_it_a_connect_msg(char* msg); 

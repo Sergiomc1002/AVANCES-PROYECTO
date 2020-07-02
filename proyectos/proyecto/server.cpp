@@ -40,19 +40,24 @@ void* listen_balancers(void* data) {
 	int n = s_socket->SendTo(&s_in, B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
 
 	r_socket->Bind(B_PORT + 1, 0);
-	n = r_socket->ReceiveFrom(&s_in, buffer, 120);
+	
+	while(true) {
+		memset(buffer, 0, 120);
+		memset(&s_in, 0, sizeof(sockaddr_in)); 
+		n = r_socket->ReceiveFrom(&s_in, buffer, 120);
 
-	if (n != -1) {	
-		ip_port_t* balancer = build_ip_port(buffer); 
-		printf("New Balancer IP : [%s] - Port : [%d] \n", balancer->ip_address, balancer->port); 
-		balancers->push_back(balancer);  			
-		// send	
-		char * addr = inet_ntoa(s_in.sin_addr);
-        printf("Sending response to : [%s] \n", addr);
-		n = s_socket->SendTo(&s_in, B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
-	}	
-	else {
-		printf("ERROR: no se pudo encontrar balanceador en la red \n");
+		if (n != -1) {	
+			ip_port_t* balancer = build_ip_port(buffer); 
+			printf("New Balancer IP : [%s] - Port : [%d] \n", balancer->ip_address, balancer->port); 
+			balancers->push_back(balancer);  			
+			// send	
+			char * addr = inet_ntoa(s_in.sin_addr);
+			printf("Sending response to : [%s] \n", addr);
+			n = s_socket->SendTo(&s_in, B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
+		}	
+		else {
+			printf("ERROR: no se pudo encontrar balanceador en la red \n");
+		}		
 	}
 }
 

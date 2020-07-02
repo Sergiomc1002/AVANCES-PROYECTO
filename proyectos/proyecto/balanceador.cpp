@@ -54,32 +54,40 @@ void* listen_servers(void * args)
         memset(buffer, 0, buff_size);
         int n = r_socket->ReceiveFrom(&s_in, buffer, buff_size);
 
-        if (n != -1) 
-        {
-            printf("Protocol[MSG from Server]: %s\n", buffer);
-            ip_port_t * server_inf = build_ip_port(buffer);
-            if (server_inf != NULL)
-            {
-                if (new_server(server_list, server_inf)) 
-                {
-                    server_list->push_back(server_inf);
-                    printf("New Server IP : [%s] - Port : [%d] \n", server_inf->ip_address, server_inf->port);
-                    char * msg = (char *)"B/C/127.0.0.1/65000";	//este seria el puerto para que el server me hable por stream, es indiferente.
-                    //int port = ntohs(s_in.sin_port);			//el server no me habla por stream, a menos que yo le pida datos. 
-                    int port = B_PORT + 1; // * * 
-                    char * addr = inet_ntoa(s_in.sin_addr);
-                    printf("Sending response to : [%s] \n", addr);
+        if (n != -1) {
+			if (is_it_a_connect_msg(buffer)) {
+				printf("Protocol[MSG from Server]: %s\n", buffer);
+				ip_port_t * server_inf = build_ip_port(buffer);
+				if (server_inf != NULL)
+				{
+					if (new_server(server_list, server_inf)) 
+					{
+						server_list->push_back(server_inf);
+						printf("New Server IP : [%s] - Port : [%d] \n", server_inf->ip_address, server_inf->port);
+						char * msg = (char *)"B/C/127.0.0.1/65000";	//este seria el puerto para que el server me hable por stream, es indiferente.
+						//int port = ntohs(s_in.sin_port);			//el server no me habla por stream, a menos que yo le pida datos. 
+						int port = B_PORT + 1; // * * 
+						char * addr = inet_ntoa(s_in.sin_addr);
+						printf("Sending response to : [%s] \n", addr);
 
-                    s_socket->SendTo(&s_in, port, msg, strlen(msg));
-                }
-                else {
-					//se le hace free a server_inf
+						s_socket->SendTo(&s_in, port, msg, strlen(msg));
+					}
+					else {
+						//se le hace free a server_inf
+					}
 				}
-            }
-            else {
-				//el servidor no respeta el protocolo. 
+				else {
+					//el servidor no respeta el protocolo. 
+				}
+			}
+			else {
+				//es un mensaje de desconexion. s
 			}
         }
+        else {
+			//no se pudo recibir nada. 
+		}
+        
     }
 
 
