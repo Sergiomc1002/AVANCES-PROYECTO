@@ -35,23 +35,24 @@ void* listen_balancers(void* data) {
 	sockaddr_in s_in;
 	char buffer[120];
 
-	char * balancer_seek_msg = (char *)"S/C/127.0.0.1/7000";
+	char * balancer_seek_msg = (char *)"S/C/127.0.0.1/7000";	//cuando me hable por stream, hableme por el 7000. 
 
-	int n = s_socket->SendTo(&s_in, "", B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
+	int n = s_socket->SendTo(&s_in, B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
 
 	r_socket->Bind(B_PORT + 1, 0);
 	n = r_socket->ReceiveFrom(&s_in, buffer, 120);
 
-	if (n != -1) {
-		
+	if (n != -1) {	
 		ip_port_t* balancer = build_ip_port(buffer); 
-		printf("ip : %s - port : %d \n", balancer->ip_address, balancer->port); 
+		printf("New Balancer IP : [%s] - Port : [%d] \n", balancer->ip_address, balancer->port); 
 		balancers->push_back(balancer);  			
 		// send	
-		n = s_socket->SendTo(&s_in, "", B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
+		char * addr = inet_ntoa(s_in.sin_addr);
+        printf("Sending response to : [%s] \n", addr);
+		n = s_socket->SendTo(&s_in, B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
 	}	
 	else {
-		printf("Error al recibir mensaje.\n");
+		printf("ERROR: no se pudo encontrar balanceador en la red \n");
 	}
 }
 
@@ -141,9 +142,6 @@ int main(int argc, char* argv[]) {
 
 	pthread_create(&listener_balancers, NULL, listen_balancers, (void*)&listener_data); 
 	
-	//este join iria al  puro final. 
-	pthread_join(listener_balancers, NULL); 
-
 #if 1
 	Socket server_socket('s', false);
 
@@ -182,5 +180,7 @@ int main(int argc, char* argv[]) {
 	//server_socket.Shutdown(client_id); 
 
 #endif 
+pthread_join(listener_balancers, NULL); 
+
 return 0;
 }

@@ -234,7 +234,7 @@ int Socket::ReceiveFrom(sockaddr_in * addr, char* buffer, int bufflen)
 }
 
 
-int Socket::SendTo(sockaddr_in * addr, char* address, int port, char *msg, int msglen) 
+int Socket::SendTo(sockaddr_in * addr, int port, char *msg, int msglen) 
 {
     int n = -1;
     int addrsize = sizeof(sockaddr_in);
@@ -312,14 +312,14 @@ void Socket::SetIDSocket(int id){
 }
 
 int Socket::Shutdown() {
-	printf("CONECTION CLOSED");
+	printf("CONECTION CLOSED\n");
 	return close(this->id);
 	
 }
 
 
 int Socket::Shutdown(int client_id) {
-	printf("CONECTION CLOSED");
+	printf("CONECTION CLOSED\n");
 	return close(this->client_id);
 }
 

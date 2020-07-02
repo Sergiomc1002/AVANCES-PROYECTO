@@ -46,7 +46,7 @@ void* listen_servers(void * args)
 
     int r = r_socket->Bind(B_PORT, 0);
 
-    sockaddr_in s_in;
+    sockaddr_in s_in;			//cuando recibo se llena de la info. 
     int buff_size = 120;
     char buffer[buff_size];
 
@@ -56,23 +56,29 @@ void* listen_servers(void * args)
 
         if (n != -1) 
         {
-            printf("Buffer: %s\n", buffer);
+            printf("Protocol[MSG from Server]: %s\n", buffer);
             ip_port_t * server_inf = build_ip_port(buffer);
             if (server_inf != NULL)
             {
                 if (new_server(server_list, server_inf)) 
                 {
                     server_list->push_back(server_inf);
-                    printf("Nuevo servidor IP: %s\n", server_inf->ip_address);
-                    char * msg = (char *)"B/C/127.0.0.1/65000";
-                    //int port = ntohs(s_in.sin_port);
+                    printf("New Server IP : [%s] - Port : [%d] \n", server_inf->ip_address, server_inf->port);
+                    char * msg = (char *)"B/C/127.0.0.1/65000";	//este seria el puerto para que el server me hable por stream, es indiferente.
+                    //int port = ntohs(s_in.sin_port);			//el server no me habla por stream, a menos que yo le pida datos. 
                     int port = B_PORT + 1; // * * 
                     char * addr = inet_ntoa(s_in.sin_addr);
-                    printf("IP Servidor: %s\n", addr);
+                    printf("Sending response to : [%s] \n", addr);
 
-                    s_socket->SendTo(&s_in, addr, port, msg, strlen(msg));
+                    s_socket->SendTo(&s_in, port, msg, strlen(msg));
                 }
+                else {
+					//se le hace free a server_inf
+				}
             }
+            else {
+				//el servidor no respeta el protocolo. 
+			}
         }
     }
 
@@ -126,7 +132,7 @@ int main()
     sockaddr_in s_in;
 
     char * msg = (char *)"B/C/127.0.0.1/7002";
-    int n = ssocket.SendTo(&s_in, "", B_PORT + 1, msg, strlen(msg));
+    int n = ssocket.SendTo(&s_in, B_PORT + 1, msg, strlen(msg));
 
     if (n != -1)
         printf("Mensaje enviado.\n");
