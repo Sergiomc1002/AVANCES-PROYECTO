@@ -92,28 +92,35 @@ void * sendToServer(void * args)
 		perror("there was an error");
         return NULL;
 	}
-    printf("Message from client: %s\n", msg_from_client);
+    printf("Message from client: %s - getting ready to send it to a server ...\n", msg_from_client);
 
     //ip_port_t * server = chooseServer();
     ip_port_t * server = *(server_list->begin());
-
-	int server_connect = server_socket.Connect(server->ip_address, server->port);
-	server_socket.Write(msg_from_client);
 	
-    bool f_exit = false;
-    int read_status = 0; 
-    int bytes_read = 0; 
-    char* response = (char*)calloc(1024, sizeof(char));
-    while((read_status = server_socket.Read(response, 1024)) > 0 && !f_exit) {
-		s->Write(response, thread_data->client_id,read_status);
+	if(server != NULL) {
+		int server_connect = server_socket.Connect(server->ip_address, server->port);
+		server_socket.Write(msg_from_client);
+
+		int read_status = 0; 
+		char* response = (char*)calloc(1024, sizeof(char));
+		while((read_status = server_socket.Read(response, 1024)) > 0) {
+			s->Write(response, thread_data->client_id, read_status);
+		}
+		
+		server_socket.Shutdown();
+		
 	}
-	int asd = server_socket.Shutdown();
+	else {
+		//DE MOMENTO NO HAY SERVIDORES LEVANTANDOS. 
+		//ENVIAR 404 NOT FOUND. 
+	}
+	
 }
 
 int main()
 {
-    Socket rsocket('d', false);
-    Socket ssocket('d', false);
+    Socket rsocket('d', false);		//para recibir cuando los servers se levantan.
+    Socket ssocket('d', false);		//para avisar cuando yo me levanto. 
 
 
     sockaddr_in s_in;
@@ -133,6 +140,7 @@ int main()
 
     pthread_create(&ls_thread, NULL, listen_servers, (void *)&args);
 
+	
     Socket server_socket('s', false);
 
 	if(-1 == server_socket.Bind(SERVER_PORT, 0)){ // 0 = ipv4.
