@@ -70,21 +70,24 @@ char* get_file_name(char* header)
 
     if (!isGetCommand) 
     {
-        printf("ERROR: Invalid Command: %s\n", command);
-        free(file_name);
-        return NULL;
+        printf("ERROR: [400 Bad Request] %s\n", header);
+        //free(file_name);
+        char* bad_request = (char*)"400 Bad Request"; 
+        strcpy(file_name, bad_request); 
     }
+    else {
 
     // Start reading file name from pos 5 (GET /)
 
-    int counter = 5;
-    int h_size = strlen(header);
-    while (header[counter] != ' ' && counter < h_size)
-    {
-        file_name[counter - 5] = header[counter];
-        counter++;
-    }
+		int counter = 5;
+		int h_size = strlen(header);
+		while (header[counter] != ' ' && counter < h_size)
+		{
+			file_name[counter - 5] = header[counter];
+			counter++;
+		}
 
+	}
     return file_name;
 }
 
@@ -134,7 +137,7 @@ char* get_extension_filename(char* filename) {
 	return file_type; 
 }
 
-char* make_response_header(char* filename, int content_length)
+char* make_response_header(char* filename, int content_length, int option)
 {
     char* response_header = (char*)calloc(1, REQUEST_HEADER_SIZE);
 	char* end_header = (char*)"\r\n\r\n"; 
@@ -143,18 +146,33 @@ char* make_response_header(char* filename, int content_length)
 	char* type_file = (char*)"Content-Type: "; 
 	char* file = (char*)"file/"; 				//ver linea donde dice char* exntesion, abajo. 
 
-    char * response = (char*)"HTTP/1.1 200 OK\r\n";
-    
-    strcpy(response_header, response);
-	strcpy(response_header+strlen(response_header), len_file); 	//no puede hacer + '0', eso daña el formato, tiene que usar strcat o strcpy, o hacerlo a pata. 
-    //de momento el campo de len queda vacio, hay que agregarlo. 
-    strcpy(response_header+strlen(response_header), end_line); 
-    strcpy(response_header+strlen(response_header), type_file); 
-    char* extension = get_extension_filename(filename);
-    //en un futoro, ese file, no debe decir file, si el archivo es html, debe decir text, si es pdf debe decir application, si es imagen decir image. so on. 
-    strcpy(response_header+strlen(response_header), file);
-    strcpy(response_header+strlen(response_header), extension); 
-    strcpy(response_header+strlen(response_header), end_header);   
+
+		if (option == 200) {
+			char * response = (char*)"HTTP/1.1 200 OK\r\n";
+			strcpy(response_header, response);
+			strcpy(response_header+strlen(response_header), len_file); 	//no puede hacer + '0', eso daña el formato, tiene que usar strcat o strcpy, o hacerlo a pata. 
+			//de momento el campo de len queda vacio, hay que agregarlo. 
+			strcpy(response_header+strlen(response_header), end_line); 
+			strcpy(response_header+strlen(response_header), type_file); 
+			char* extension = get_extension_filename(filename);
+			//en un futoro, ese file, no debe decir file, si el archivo es html, debe decir text, si es pdf debe decir application, si es imagen decir image. so on. 
+			strcpy(response_header+strlen(response_header), file);
+			strcpy(response_header+strlen(response_header), extension); 
+			strcpy(response_header+strlen(response_header), end_header);
+		}
+		else {
+			//400 
+			//generalmente se manda igual el index.html, seria agregar eso. 
+			char* response = (char*)"HTTP/1.1 400 Bad Request\r\n"; 
+			strcpy(response_header, response);
+			strcpy(response_header+strlen(response_header), len_file);
+			strcpy(response_header+strlen(response_header), end_line);
+			strcpy(response_header+strlen(response_header), type_file); 
+			char* no_file = (char*)"no file"; 
+			strcpy(response_header+strlen(response_header), file);
+			strcpy(response_header+strlen(response_header), no_file);    
+		}
+	
     return response_header;
 }
 
@@ -413,13 +431,29 @@ bool es_directorio(char * filename){
 int get_http_status(char* response_header, int read_status) {
 	int status_http = -1;
 	 
-	if (strncmp(response_header+10, "200 OK", 6)) {
-		status_http = 1; 
+	if (0 == strncmp(response_header+9, "200 OK", 6)) {
+		status_http = 200; 
 	}
-	
-	
-	
-	
+	else {
+		if (0 == strncmp(response_header+9, "400 Bad Request", 15)) {
+			status_http = 400; 
+		}
+		else {
+			if (0 == strncmp(response_header+9, "404 Not Found", 13) == 0) {
+				status_http = 404; 
+			}
+			else {
+				if (0 == strncmp(response_header+9, "501 Not Implemented", 19)) {
+					status_http = 501; 
+				}
+				else {
+					if (0 == strncmp(response_header+9, "505 HTTP Version Not Supported", 30)) {
+						status_http = 505; 
+					}
+				}
+			}
+		}
+	}
 	return status_http; 
 }
 

@@ -26,7 +26,7 @@ extern int get_file_size(char* response_header);
 
 extern char* make_request_header(char* filename);
 
-extern char* make_response_header(char* filename, int content_length);
+extern char* make_response_header(char* filename, int content_length, int option);
 
 extern char* get_file_extension(char* response_header);
 

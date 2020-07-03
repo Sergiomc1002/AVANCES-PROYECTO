@@ -73,7 +73,7 @@ void* listen_servers(void * args)
 							s_socket->SendTo(&s_in, port, msg, strlen(msg));
 						}
 						else {
-							free(server_inf);
+							//free(server_inf);
 							//se le hace free a server_inf
 						}
 				}
@@ -95,11 +95,11 @@ void* listen_servers(void * args)
 				}
 			}
 			else {
-				//el mensaje no es valido, enviar un codigo de error 404 o algo. 
+				printf("ERROR [THE MSG DOESNT FOLLOW THE PROTOCOL] \n"); 
 			}
         }
         else {
-			//no se pudo recibir nada. 
+			printf("ERROR [FAILED TO RCV FROM SERVER] \n"); 
 		}
         
     }
@@ -142,6 +142,8 @@ void * sendToServer(void * args)
 	else {
 		//DE MOMENTO NO HAY SERVIDORES LEVANTANDOS. 
 		//ENVIAR 404 NOT FOUND. 
+		
+		
 	}
 	
 }

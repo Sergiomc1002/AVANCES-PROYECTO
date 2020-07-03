@@ -73,52 +73,74 @@ void* run(void* data) {
 	}
 	printf("Message from client: %s\n", msg_from_client);
 	char* filename = get_file_name(msg_from_client);
-	char* response_header = make_response_header(filename, 0); 		//ese 0, deberian ser la cantidad de bytes del archivo. 
-	char* buffer_to_read_file = (char*)calloc(1024, sizeof(char)); 
+	char* response_header; 
 	
-	strcpy(buffer_to_read_file, response_header); 
-	int len_header = strlen(buffer_to_read_file);  
-	int read_status = 0;  
-	int bytes_read = 0; 
-	bool end_read = false;
-	int file_id = -1;
-	bool directorio = es_directorio(filename);
-	if(directorio){
-		char * temp = new char [200];
-		temp[0] = '/';
-		strcpy(temp+1,filename);
-		file_id = open(temp, O_RDONLY);
-		//delete temp;
-	}
-	else{
-		file_id = open(filename, O_RDONLY);
-	}
-	if (-1 != file_id) {
-		while(end_read == false) {
-			if (bytes_read != 0) {
-				if((read_status = read(file_id, buffer_to_read_file, 1024)) != 0) {
-					
-					thread_data->server_socket->Write(buffer_to_read_file, thread_data->client_id, read_status);
-					memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 	
-					bytes_read+= read_status; 
-					
-				}
-				else {
-					end_read = true; 	
-				} 		
-			}
-			else {
-				read_status = read(file_id, buffer_to_read_file+len_header, 1024-len_header); 
-				thread_data->server_socket->Write(buffer_to_read_file, thread_data->client_id, 1024);
-				memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 	
-				bytes_read+= read_status;
-				
-			}	
-		}		
+	int option = -1; 
+	
+	if (!strcmp(filename, "400 Bad Request")) {
+		response_header = make_response_header(filename, 0, 400);
+		option = 400;  
 	}
 	else {
-		//el archivo no existe, y hay que responderle al cliente, que lo que pide no existe. 
+		response_header = make_response_header(filename, 0, 200); 		//ese 0, deberian ser la cantidad de bytes del archivo. 
+		option = 200; 
 	}
+	
+	if (option == 200) {
+			char* buffer_to_read_file = (char*)calloc(1024, sizeof(char)); 
+			
+			strcpy(buffer_to_read_file, response_header); 
+			int len_header = strlen(buffer_to_read_file);  
+			int read_status = 0;  
+			int bytes_read = 0; 
+			bool end_read = false;
+			int file_id = -1;
+			bool directorio = es_directorio(filename);
+			if(directorio){
+				char * temp = new char [200];
+				temp[0] = '/';
+				strcpy(temp+1,filename);
+				file_id = open(temp, O_RDONLY);
+				//delete temp;
+			}
+			else{
+				file_id = open(filename, O_RDONLY);
+			}
+			if (-1 != file_id) {
+				while(end_read == false) {
+					if (bytes_read != 0) {
+						if((read_status = read(file_id, buffer_to_read_file, 1024)) != 0) {
+							
+							thread_data->server_socket->Write(buffer_to_read_file, thread_data->client_id, read_status);
+							memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 	
+							bytes_read+= read_status; 
+							
+						}
+						else {
+							end_read = true; 	
+						} 		
+					}
+					else {
+						read_status = read(file_id, buffer_to_read_file+len_header, 1024-len_header); 
+						thread_data->server_socket->Write(buffer_to_read_file, thread_data->client_id, 1024);
+						memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 	
+						bytes_read+= read_status;
+						
+					}	
+				}		
+			}
+			else {
+				memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 
+				free(response_header);
+				response_header = make_response_header("", 0, 404); 
+				//aqui sería hacer el 404 not found. 
+			}
+	}
+	else {
+			//400 BAD REQUEST. 
+			thread_data->server_socket->Write(response_header, thread_data->client_id, strlen(response_header)); 
+	}
+	
 		
 	//free(filename); 
 	// free(response_header); 

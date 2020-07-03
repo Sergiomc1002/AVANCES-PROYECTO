@@ -27,13 +27,12 @@ int main( int argc, char * argv[] ) {
 	set_initial_values(start_values, request); 
 	char* file = (char*)calloc(100, sizeof(char)); 
 	char* name = extract_name(start_values->filename); //recibe el nombre.extension
-	printf("NAME: %s\n",name);
 	int id_file;     	
 	strcpy(file, name);
 	request = make_request_header(start_values->filename);
-	//request = 
 	printf("REQUEST:  %s\n",request);
 	int status_connect = s.Connect(start_values->ip_address, start_values->server_port );
+	
 	int write_status = s.Write(request);
 	char* response = (char*)calloc(1024, sizeof(char));
 	int bytes_read = 0; 
@@ -52,7 +51,8 @@ int main( int argc, char * argv[] ) {
 			memset(response, 0, 1024 * sizeof(char)); 	
 		}
 		else {	
-			if ((status_http_protocol = get_http_status(response, read_status)) == 1) {	
+			status_http_protocol = get_http_status(response, read_status);
+			if (status_http_protocol == 200) {	
 				char* extension = get_file_extension(response);
 				strcat(file, extension);
 				printf("BUILDING FILE : %s\n",file);	
@@ -69,13 +69,31 @@ int main( int argc, char * argv[] ) {
 		}
 		printf("read status : %d \n", read_status); 
 	}
-	printf("FILE BUILT\n"); 
-	//printf("HOLA\n");
+	if (status_http_protocol == 200) {
+		printf("FILE BUILT\n"); 
+	}
 
-	if (status_http_protocol != 1) {			//ocurrio un error. 
-		printf("something went wrong\n"); 
+	if (status_http_protocol != 200) {			//ocurrio un error. 
 		switch(status_http_protocol) {
+			case 400:
+				printf("400 Bad Request \n"); 
+			break; 
 			
+			case 404:
+				printf("404 Not Found \n"); 
+			break; 
+			
+			case 501:
+				printf("501 Not Implemented \n"); 
+			break; 
+			
+			case 505:
+				printf("505 HTTP Version Not Supported \n"); 
+			break; 
+			
+			default:
+				printf("ERROR [something went wrong] : %d \n", status_http_protocol);
+			break; 
 		}
 		
 	}
