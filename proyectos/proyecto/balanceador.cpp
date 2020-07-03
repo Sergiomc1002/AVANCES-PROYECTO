@@ -160,7 +160,7 @@ int main()
     int n = ssocket.SendTo(&s_in, B_PORT + 1, msg, strlen(msg));
 
     if (n != -1)
-        printf("Mensaje enviado.\n");
+        printf("Me acabo de levantar, broadcast enviado.\n");
 
     pthread_t ls_thread;
     std::list<ip_port_t*> server_list;

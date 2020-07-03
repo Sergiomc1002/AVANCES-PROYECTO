@@ -38,6 +38,7 @@ void* listen_balancers(void* data) {
 	char * balancer_seek_msg = (char *)"S/C/127.0.0.1/7000";	//cuando me hable por stream, hableme por el 7000. 
 
 	int n = s_socket->SendTo(&s_in, B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
+	printf("Me acabo de levantar, broadcast enviado.\n");
 
 	r_socket->Bind(B_PORT + 1, 0);
 	
