@@ -145,7 +145,8 @@ void* run(void* data) {
 			else {
 				memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 
 				free(response_header);
-				response_header = make_response_header("", 0, 404); 
+				response_header = make_response_header("", 0, 404);
+				thread_data->server_socket->Write(response_header, thread_data->client_id, strlen(response_header)); 
 				//aqui sería hacer el 404 not found. 
 			}
 	}

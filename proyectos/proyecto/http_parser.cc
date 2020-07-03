@@ -240,6 +240,18 @@ char* make_response_header(char* filename, int content_length, int option)
 						strcpy(response_header+strlen(response_header), file);
 						strcpy(response_header+strlen(response_header), no_file);   
 					}
+					else {
+						if (option == 404) {
+							char* response = (char*)"HTTP/1.1 404 Not Found\r\n"; 
+							strcpy(response_header, response);
+							strcpy(response_header+strlen(response_header), len_file);
+							strcpy(response_header+strlen(response_header), end_line);
+							strcpy(response_header+strlen(response_header), type_file); 
+							char* no_file = (char*)"no file"; 
+							strcpy(response_header+strlen(response_header), file);
+							strcpy(response_header+strlen(response_header), no_file);   								
+						}
+					}
 				}
 			}
 		}
