@@ -52,6 +52,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <regex>
 //#include <string>
 
 /*
@@ -59,35 +60,84 @@
     size: size of the header
     ret: char* with the name of the file requested in the header    
 */
-char* get_file_name(char* header)
-{
-    char* file_name = (char*)calloc(1, FILE_NAME_SIZE);
-
-    char* command = (char*)malloc(3);
-    strncpy(command, header, 3);
-
-    bool isGetCommand = strcmp(command, "GET") == 0;
-
-    if (!isGetCommand) 
-    {
-        printf("ERROR: [400 Bad Request] %s\n", header);
-        //free(file_name);
-        char* bad_request = (char*)"400 Bad Request"; 
-        strcpy(file_name, bad_request); 
-    }
-    else {
-
-    // Start reading file name from pos 5 (GET /)
-
-		int counter = 5;
-		int h_size = strlen(header);
-		while (header[counter] != ' ' && counter < h_size)
-		{
-			file_name[counter - 5] = header[counter];
-			counter++;
-		}
-
+char* get_file_name(char* header) {
+	std::regex expression("GET (/([a-zA-Z1-9.])+)* HTTP/1.1\r\n([a-zA-Z .:\r\n])*");
+	std::regex expression_a("(/([a-zA-Z1-9.])+)* HTTP/1.1\r\n([a-zA-Z .:\r\n])*"); 
+	std::regex number("[1-9]");
+	char* file_name = (char*)calloc(1, FILE_NAME_SIZE);
+	
+	int index_head = 0;
+	int end_pos = 0; 
+	int len_head = strlen(header);  
+	while (index_head < len_head && header[index_head] != '\r') {
+		++index_head; 
 	}
+	if (index_head+1 < len_head) {
+		if (header[index_head+1] == '\n') {
+			end_pos = index_head; 
+		}
+	}
+	else {
+		//el mensaje no posee ningun \r\n
+		end_pos = len_head; 
+	}
+	
+	if (!regex_match(header, expression)) {
+		printf("no hizo match \n"); 
+		//la entrada es invalida. 
+		char http_version[200];
+		int len_header = end_pos;   
+		strcpy(http_version, header+(len_header-3)); //quiero nadamas "1.1"
+		printf("httpVersion : %s \n", http_version); 
+		if ((http_version[0] != '1' || http_version[2] != '1') && http_version[1] == '.') {	//si posee el punto.
+			printf("entre aqui \n"); 
+			//la unica diferencia son los numeros. 			
+			char* number_one = (char*)calloc(1,sizeof(char)); 
+			number_one[0] = http_version[0];
+			printf("numero 1 : %s \n", number_one);  
+			char* number_two = (char*)calloc(1, sizeof(char)); 
+			number_two[0] = http_version[2]; 
+			printf("numero 2 : %s \n", number_two); 
+			if (regex_match(number_one, number) && regex_match(number_two, number)) {	//si ambos caracteres son numeros. 
+				//estamos en el caso de version de HTTP no es soportable. 
+				char* http_version_not_supported = (char*)"505 HTTP Version Not Supported"; 
+				strcpy(file_name, http_version_not_supported); 
+			}
+			free(number_one); 
+			free(number_two); 
+		}
+		else {
+			//Not Implemented.
+			int position_header = 0; 
+			while (header[position_header] != ' ') {
+				++position_header; 
+			} 
+			++position_header; 
+			if (regex_match(header+position_header, expression_a)) {
+				//la unica diferencia es la palabra inicial. 
+				//puede ser POST, PUT, DELETE, etc. por lo tanto las funciones no estan implementadas. 
+				char* not_implemented = (char*)"501 Not Implemented";
+				strcpy(file_name, not_implemented);  
+			}
+			else {
+				//Bad Request. 
+				char* bad_request = (char*)"400 Bad Request"; 
+				strcpy(file_name, bad_request); 
+			}
+		} 	
+	}
+	else {
+		//la entrada es valida. 
+		// Start reading file name from pos 5 (GET /)
+			int counter = 5;
+			int h_size = strlen(header);
+			
+			while (header[counter] != ' ' && counter < h_size) {
+				file_name[counter - 5] = header[counter];
+				counter++;
+			}
+	}
+	
     return file_name;
 }
 
