@@ -454,13 +454,12 @@ ip_port_t* build_ip_port(char* msg) {
 		return balancer; 
 	}
 	else {
-		printf("el mensaje del balanceador es incorrecto"); 
+		printf("EL MENSAJE NO RESPETA EL PROTOCOLO \n"); 
 		return NULL;
 	}
 } 
 
 
 bool is_it_a_connect_msg(char* msg) {
-	
-	return true; 	
+	return (*(msg+2) == 'C'); 
 }
