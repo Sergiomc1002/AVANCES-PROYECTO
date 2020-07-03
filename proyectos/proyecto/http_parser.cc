@@ -58,7 +58,7 @@
 /*
     header: char* containing the header
     size: size of the header
-    ret: char* with the name of the file requested in the header    
+    ret: char* with the name of the file requested in the header or error code 404,500,501 etc.   
 */
 char* get_file_name(char* header) {
 	std::regex expression("GET (/([a-zA-Z1-9.])+)* HTTP/1.1\r\n([a-zA-Z .:\r\n])*");
@@ -83,21 +83,16 @@ char* get_file_name(char* header) {
 	}
 	
 	if (!regex_match(header, expression)) {
-		printf("no hizo match \n"); 
 		//la entrada es invalida. 
 		char http_version[200];
 		int len_header = end_pos;   
 		strcpy(http_version, header+(len_header-3)); //quiero nadamas "1.1"
-		printf("httpVersion : %s \n", http_version); 
 		if ((http_version[0] != '1' || http_version[2] != '1') && http_version[1] == '.') {	//si posee el punto.
-			printf("entre aqui \n"); 
 			//la unica diferencia son los numeros. 			
 			char* number_one = (char*)calloc(1,sizeof(char)); 
-			number_one[0] = http_version[0];
-			printf("numero 1 : %s \n", number_one);  
+			number_one[0] = http_version[0]; 
 			char* number_two = (char*)calloc(1, sizeof(char)); 
 			number_two[0] = http_version[2]; 
-			printf("numero 2 : %s \n", number_two); 
 			if (regex_match(number_one, number) && regex_match(number_two, number)) {	//si ambos caracteres son numeros. 
 				//estamos en el caso de version de HTTP no es soportable. 
 				char* http_version_not_supported = (char*)"505 HTTP Version Not Supported"; 
@@ -211,16 +206,42 @@ char* make_response_header(char* filename, int content_length, int option)
 			strcpy(response_header+strlen(response_header), end_header);
 		}
 		else {
-			//400 
-			//generalmente se manda igual el index.html, seria agregar eso. 
-			char* response = (char*)"HTTP/1.1 400 Bad Request\r\n"; 
-			strcpy(response_header, response);
-			strcpy(response_header+strlen(response_header), len_file);
-			strcpy(response_header+strlen(response_header), end_line);
-			strcpy(response_header+strlen(response_header), type_file); 
-			char* no_file = (char*)"no file"; 
-			strcpy(response_header+strlen(response_header), file);
-			strcpy(response_header+strlen(response_header), no_file);    
+			if (option == 400) {
+				//400 
+				//generalmente se manda igual el index.html, seria agregar eso. 
+				char* response = (char*)"HTTP/1.1 400 Bad Request\r\n"; 
+				strcpy(response_header, response);
+				strcpy(response_header+strlen(response_header), len_file);
+				strcpy(response_header+strlen(response_header), end_line);
+				strcpy(response_header+strlen(response_header), type_file); 
+				char* no_file = (char*)"no file"; 
+				strcpy(response_header+strlen(response_header), file);
+				strcpy(response_header+strlen(response_header), no_file);   
+			}
+			else {
+				if (option == 501) {
+					char* response = (char*)"HTTP/1.1 501 Not Implemented\r\n";
+					strcpy(response_header, response);
+					strcpy(response_header+strlen(response_header), len_file);
+					strcpy(response_header+strlen(response_header), end_line);
+					strcpy(response_header+strlen(response_header), type_file); 
+					char* no_file = (char*)"no file"; 
+					strcpy(response_header+strlen(response_header), file);
+					strcpy(response_header+strlen(response_header), no_file);   					
+				}
+				else {
+					if (option == 505) {
+						char* response = (char*)"HTTP/1.1 505 HTTP Version Not Supported\r\n";
+						strcpy(response_header, response);
+						strcpy(response_header+strlen(response_header), len_file);
+						strcpy(response_header+strlen(response_header), end_line);
+						strcpy(response_header+strlen(response_header), type_file); 
+						char* no_file = (char*)"no file"; 
+						strcpy(response_header+strlen(response_header), file);
+						strcpy(response_header+strlen(response_header), no_file);   
+					}
+				}
+			}
 		}
 	
     return response_header;
@@ -479,8 +500,7 @@ bool es_directorio(char * filename){
 
 
 int get_http_status(char* response_header, int read_status) {
-	int status_http = -1;
-	 
+	int status_http = -1;	 
 	if (0 == strncmp(response_header+9, "200 OK", 6)) {
 		status_http = 200; 
 	}
@@ -489,7 +509,7 @@ int get_http_status(char* response_header, int read_status) {
 			status_http = 400; 
 		}
 		else {
-			if (0 == strncmp(response_header+9, "404 Not Found", 13) == 0) {
+			if (0 == strncmp(response_header+9, "404 Not Found", 13)) {
 				status_http = 404; 
 			}
 			else {

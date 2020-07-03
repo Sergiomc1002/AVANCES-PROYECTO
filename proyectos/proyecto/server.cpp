@@ -82,8 +82,20 @@ void* run(void* data) {
 		option = 400;  
 	}
 	else {
-		response_header = make_response_header(filename, 0, 200); 		//ese 0, deberian ser la cantidad de bytes del archivo. 
-		option = 200; 
+		if (!strcmp(filename, "505 HTTP Version Not Supported")) {
+			response_header = make_response_header(filename, 0, 505); 
+			option = 505; 
+		}
+		else {
+			if (!strcmp(filename, "501 Not Implemented")) {
+				response_header = make_response_header(filename, 0, 501); 
+				option = 501; 
+			}
+			else {
+				response_header = make_response_header(filename, 0, 200); 		//ese 0, deberian ser la cantidad de bytes del archivo. 
+				option = 200; 
+			}
+		}
 	}
 	
 	if (option == 200) {
@@ -137,11 +149,9 @@ void* run(void* data) {
 			}
 	}
 	else {
-			//400 BAD REQUEST. 
 			thread_data->server_socket->Write(response_header, thread_data->client_id, strlen(response_header)); 
 	}
 	
-		
 	//free(filename); 
 	// free(response_header); 
 	// free(msg_from_client);
