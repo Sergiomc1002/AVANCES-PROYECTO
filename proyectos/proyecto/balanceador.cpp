@@ -44,7 +44,7 @@ void* listen_servers(void * args)
     Socket * s_socket = ar->s_socket;
     std::list<ip_port_t*> * server_list = ar->server_list;
 
-    int r = r_socket->Bind(B_PORT, 0);
+    //int r = r_socket->Bind(B_PORT, 0);
 
     sockaddr_in s_in;			//cuando recibo se llena de la info. 
     int buff_size = 120;
@@ -152,7 +152,7 @@ int main()
 {
     Socket rsocket('d', false);		//para recibir cuando los servers se levantan.
     Socket ssocket('d', false);		//para avisar cuando yo me levanto. 
-
+	rsocket.Bind(B_PORT, 0); 
 
     sockaddr_in s_in;
 
