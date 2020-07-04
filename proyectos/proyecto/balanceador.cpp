@@ -10,8 +10,15 @@
 
 #define B_PORT 65000
 #define SERVER_PORT 7002
-#define MAXLINE 1024 
-
+#define MAXLINE 1024
+//CONSTANTES PARA ALGORITMOS PARA ELEGIR SERVIDORES
+#define ROUNDROBIN 1
+#define ROUNDROBINPESOS 2
+#define DIRCLIENT 3
+#define LESSCONNECTIONS 4
+using namespace std;
+int numServers = 0;
+std::list<int> server_weigths;
 typedef struct {
 	Socket *server_socket;
 	int client_id;
@@ -27,6 +34,7 @@ typedef struct
 
 bool new_server(std::list<ip_port_t*> * server_list, ip_port_t * server_inf)
 {
+	int randomWeigth = 1+rand()%4;
     std::list<ip_port_t*>::iterator it = server_list->begin();
     while(it != server_list->end())
     {
@@ -34,6 +42,8 @@ bool new_server(std::list<ip_port_t*> * server_list, ip_port_t * server_inf)
             return false;
         it++;
     }
+	server_weigths.push_back(randomWeigth);
+	numServers++;
     return true;
 }
 
@@ -106,6 +116,84 @@ void* listen_servers(void * args)
 
 
 }
+int roundRobinIndex = 0;
+ip_port_t * roundRobin(list<ip_port_t*> * server_list){
+	ip_port_t * temp = NULL;
+	int index = roundRobinIndex;
+	int i = 0;
+	
+	roundRobinIndex = (roundRobinIndex+1)%numServers;
+	std::list<ip_port_t*>::iterator it = server_list->begin();
+    while(it != server_list->end() &&  i < roundRobinIndex){
+        it++;
+		i++;
+    }
+	temp = *it;
+	
+	if(temp == NULL){
+		printf("ERROR EN ROUNDROBIN \n");
+	}
+	return temp;
+}
+int weigthCounter = 0;
+int roundRobinWeigthIndex = 0;
+
+ip_port_t * roundRobinPesos(list<ip_port_t*> * server_list){
+	ip_port_t * temp = NULL;
+	
+	std::list<ip_port_t*>::iterator it = server_list->begin();
+	std::list<int>::iterator itWeight = server_weigths.begin();
+	for(int i = 0; i < roundRobinWeigthIndex; ++i){
+		itWeight++;
+	}
+	
+	if(weigthCounter < *(itWeight)){
+		weigthCounter++;
+	}
+	else{
+		weigthCounter = 1;
+		roundRobinWeigthIndex = (roundRobinWeigthIndex+1)%numServers;
+	}
+	
+	temp = *(it);
+	temp+=roundRobinWeigthIndex;
+	
+	if(temp == NULL){
+		printf("ERROR EN ROUNDROBIN \n");
+	}
+	return temp;
+}
+
+ip_port_t * dirClient(){
+	
+	
+	
+}
+
+ip_port_t * lessConnections(){
+	
+	
+	
+}
+ip_port_t * getServer(int algorithm , list<ip_port_t*> * server_list){
+	ip_port_t * temp;
+	switch(algorithm){
+		case ROUNDROBINPESOS:
+			temp = roundRobinPesos(server_list);
+			break;
+		case DIRCLIENT:
+			temp = dirClient();
+			break;
+		case LESSCONNECTIONS:
+			temp = lessConnections();
+			break;
+		default:
+			//ROUNDROBIN
+			temp = roundRobin(server_list);
+			break;
+	}
+	return temp;
+}
 
 void * sendToServer(void * args)
 {
@@ -123,7 +211,8 @@ void * sendToServer(void * args)
     printf("Message from client: %s - getting ready to send it to a server ...\n", msg_from_client);
 
     //ip_port_t * server = chooseServer();
-    ip_port_t * server = *(server_list->begin());
+   // ip_port_t * server = *(server_list->begin());
+	ip_port_t * server = getServer(ROUNDROBIN, server_list);
 	
 	if(server != NULL) {
 		int server_connect = server_socket.Connect(server->ip_address, server->port);
@@ -150,6 +239,7 @@ void * sendToServer(void * args)
 
 int main()
 {
+	srand(time(NULL));
     Socket rsocket('d', false);		//para recibir cuando los servers se levantan.
     Socket ssocket('d', false);		//para avisar cuando yo me levanto. 
 	rsocket.Bind(B_PORT, 0); 
