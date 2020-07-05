@@ -11,17 +11,27 @@
 char * MY_IP;
 char * msg; // mensaje a servidores
 
+#define TEST 1
+//#define RED
+#define LOCAL
+
+
 #define B_PORT 65000
 #define SERVER_PORT 7002
-#define MAXLINE 1024
+#define MAXLINE 1024 
+
 //CONSTANTES PARA ALGORITMOS PARA ELEGIR SERVIDORES
 #define ROUNDROBIN 1
 #define ROUNDROBINPESOS 2
 #define DIRCLIENT 3
 #define LESSCONNECTIONS 4
+
+
 using namespace std;
 int numServers = 0;
 std::list<int> server_weigths;
+
+
 typedef struct {
 	Socket *server_socket;
 	int client_id;
@@ -37,7 +47,6 @@ typedef struct
 
 bool new_server(std::list<ip_port_t*> * server_list, ip_port_t * server_inf)
 {
-	int randomWeigth = 1+rand()%4;
     std::list<ip_port_t*>::iterator it = server_list->begin();
     while(it != server_list->end())
     {
@@ -45,10 +54,15 @@ bool new_server(std::list<ip_port_t*> * server_list, ip_port_t * server_inf)
             return false;
         it++;
     }
-	server_weigths.push_back(randomWeigth);
-	numServers++;
     return true;
 }
+
+
+
+bool its_a_balancer(char* msg) {
+	return (msg[0] == 'B'); 
+}
+
 
 void* listen_servers(void * args)
 {
@@ -67,7 +81,8 @@ void* listen_servers(void * args)
         memset(buffer, 0, buff_size);
         int n = r_socket->ReceiveFrom(&s_in, buffer, buff_size);
 
-        if (n != -1) {
+        //if (n != -1) {
+        if (n != -1 && !its_a_balancer(buffer)) {
 			printf("Protocol[MSG from Server]: %s\n", buffer);
 			ip_port_t * server_inf = build_ip_port(buffer);
 			if (server_inf != NULL) {
@@ -77,9 +92,13 @@ void* listen_servers(void * args)
 						{
 							server_list->push_back(server_inf);
 							printf("New Server IP : [%s] - Port : [%d] \n", server_inf->ip_address, server_inf->port);
-							//char * msg = (char *)"B/C/127.0.0.1/65000";	//este seria el puerto para que el server me hable por stream, es indiferente.
+							
+							#ifdef LOCAL
+								char * msg = (char *)"B/C/127.0.0.1/65000";	//este seria el puerto para que el server me hable por stream, es indiferente.
+							#endif 
+							
 							//int port = ntohs(s_in.sin_port);			//el server no me habla por stream, a menos que yo le pida datos. 
-							int port = B_PORT; // * * 
+							int port = B_PORT + TEST; // * * 
 							char * addr = inet_ntoa(s_in.sin_addr);
 							printf("Sending response to : [%s] \n", addr);
 
@@ -119,6 +138,9 @@ void* listen_servers(void * args)
 
 
 }
+
+
+
 int roundRobinIndex = 0;
 ip_port_t * roundRobin(list<ip_port_t*> * server_list){
 	ip_port_t * temp = NULL;
@@ -198,6 +220,10 @@ ip_port_t * getServer(int algorithm , list<ip_port_t*> * server_list){
 	return temp;
 }
 
+
+
+
+
 void * sendToServer(void * args)
 {
 	Socket server_socket('s',false);
@@ -214,8 +240,8 @@ void * sendToServer(void * args)
     printf("Message from client: %s - getting ready to send it to a server ...\n", msg_from_client);
 
     //ip_port_t * server = chooseServer();
-   // ip_port_t * server = *(server_list->begin());
-	ip_port_t * server = getServer(ROUNDROBIN, server_list);
+    ip_port_t * server = *(server_list->begin());
+    //ip_port_t * server = getServer(ROUNDROBIN, server_list);
 	
 	if(server != NULL) {
 		int server_connect = server_socket.Connect(server->ip_address, server->port);
@@ -242,19 +268,32 @@ void * sendToServer(void * args)
 
 int main(int argc, char* argv[])
 {
-	srand(time(NULL));
+	
+	
     Socket rsocket('d', false);		//para recibir cuando los servers se levantan.
     Socket ssocket('d', false);		//para avisar cuando yo me levanto. 
 	rsocket.Bind(B_PORT, 0); 
 
+	#ifdef RED
+		if (argc != 2) {
+			printf("parametros invalidos \n");
+			return 0;  
+		}
+	
+		MY_IP = argv[1];
+		std::string ips(MY_IP);
+		std::string msgs = "B/C/" + ips + "/" + std::to_string(SERVER_PORT);
+		
+		msg = (char *)msgs.c_str();
+	#endif
+
     sockaddr_in s_in;
 
-	MY_IP = argv[1];
-	std::string ips(MY_IP);
-	std::string msgs = "B/C/" + ips + "/" + std::to_string(SERVER_PORT);
-	
-    msg = (char *)msgs.c_str();
-    int n = ssocket.SendTo(&s_in, B_PORT, msg, strlen(msg));
+	#ifdef LOCAL
+		char * msg = (char *)"B/C/127.0.0.1/7002";
+    #endif
+    
+    int n = ssocket.SendTo(&s_in, B_PORT + TEST, msg, strlen(msg));
 
     if (n != -1)
         printf("Me acabo de levantar, broadcast enviado.\n");

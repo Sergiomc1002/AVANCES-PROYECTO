@@ -10,8 +10,13 @@
 #include <arpa/inet.h>
 #include "http_parser.h"
 #include <list>
-#define SERVER_PORT 7002
+#define SERVER_PORT 7000
 #define B_PORT 65000
+#define TEST 1
+
+//#define RED true
+
+#define LOCAL true
 
 char * MY_IP;
 
@@ -36,12 +41,17 @@ void* listen_balancers(void* data) {
 	sockaddr_in s_in;
 	char buffer[120];
 
+	#ifdef RED
 	std::string ips(MY_IP);
 	std::string balancer_seek_msg = "S/C/" + ips + "/" + std::to_string(SERVER_PORT);
-	const char * msgp = balancer_seek_msg.c_str();
-	//har * balancer_seek_msg = (char *)"S/C/127.0.0.1/7000";	//cuando me hable por stream, hableme por el 7000. 
-
-	int n = s_socket->SendTo(&s_in, B_PORT, (char *)msgp, strlen(msgp));
+		char * msgp = (char*)balancer_seek_msg.c_str();
+	#endif
+	
+	#ifdef LOCAL
+		char * msgp = (char *)"S/C/127.0.0.1/7000";	//cuando me hable por stream, hableme por el 7000. 
+	#endif
+	
+	int n = s_socket->SendTo(&s_in, B_PORT, msgp, strlen(msgp));
 	printf("Me acabo de levantar, broadcast enviado.\n");
 
 	//r_socket->Bind(B_PORT + 1, 0);
@@ -58,7 +68,7 @@ void* listen_balancers(void* data) {
 			// send	
 			char * addr = inet_ntoa(s_in.sin_addr);
 			printf("Sending response to : [%s] to Port : [%d] \n", addr, B_PORT);
-			n = s_socket->SendTo(&s_in, B_PORT, (char *)msgp, strlen(msgp));
+			n = s_socket->SendTo(&s_in, B_PORT, msgp, strlen(msgp));
 			printf("response sent \n"); 
 		}	
 		else {
@@ -177,19 +187,25 @@ int main(int argc, char* argv[]) {
 	listener_data_t listener_data; 
 	memset(&listener_data, 0, sizeof(listener_data_t));
 	Socket r_socket('d', false);
-	r_socket.Bind(B_PORT, 0); 
+	r_socket.Bind(B_PORT+TEST, 0); 
 	Socket s_socket('d', false);
 	std::list<ip_port_t*> balancers;	 
 	listener_data.balancers = &balancers; 
 	listener_data.r_socket = &r_socket;
 	listener_data.s_socket = &s_socket;
-	 
 
-	MY_IP = argv[1];	
+	#ifdef RED
+		if (argc != 2) {
+			printf("parametros invalidos \n");
+			return 0;  
+		}
+		MY_IP = argv[1];	
+	#endif
+
+
 
 	pthread_create(&listener_balancers, NULL, listen_balancers, (void*)&listener_data); 
 	
-#if 1
 	Socket server_socket('s', false);
 
 	if(-1 == server_socket.Bind(SERVER_PORT, 0)){ // 0 = ipv4.
@@ -226,7 +242,6 @@ int main(int argc, char* argv[]) {
 
 	//server_socket.Shutdown(client_id); 
 
-#endif 
 pthread_join(listener_balancers, NULL); 
 
 return 0;
