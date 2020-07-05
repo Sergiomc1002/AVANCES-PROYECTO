@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
 	listener_data_t listener_data; 
 	memset(&listener_data, 0, sizeof(listener_data_t));
 	Socket r_socket('d', false);
-	r_socket.Bind(B_PORT+1, 0); 
+	r_socket.Bind(B_PORT, 0); 
 	Socket s_socket('d', false);
 	std::list<ip_port_t*> balancers;	 
 	listener_data.balancers = &balancers; 
