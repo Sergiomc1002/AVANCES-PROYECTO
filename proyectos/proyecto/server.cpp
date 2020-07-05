@@ -10,9 +10,10 @@
 #include <arpa/inet.h>
 #include "http_parser.h"
 #include <list>
-#define SERVER_PORT 7000
+#define SERVER_PORT 7002
 #define B_PORT 65000
 
+char * MY_IP;
 
 typedef struct {
 	std::list<ip_port_t*> * balancers; 
@@ -35,9 +36,12 @@ void* listen_balancers(void* data) {
 	sockaddr_in s_in;
 	char buffer[120];
 
-	char * balancer_seek_msg = (char *)"S/C/127.0.0.1/7000";	//cuando me hable por stream, hableme por el 7000. 
+	std::string ips(MY_IP);
+	std::string balancer_seek_msg = "S/C/" + ips + "/" + std::to_string(SERVER_PORT);
+	const char * msgp = balancer_seek_msg.c_str();
+	//har * balancer_seek_msg = (char *)"S/C/127.0.0.1/7000";	//cuando me hable por stream, hableme por el 7000. 
 
-	int n = s_socket->SendTo(&s_in, B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
+	int n = s_socket->SendTo(&s_in, B_PORT, (char *)msgp, strlen(msgp));
 	printf("Me acabo de levantar, broadcast enviado.\n");
 
 	//r_socket->Bind(B_PORT + 1, 0);
@@ -54,7 +58,7 @@ void* listen_balancers(void* data) {
 			// send	
 			char * addr = inet_ntoa(s_in.sin_addr);
 			printf("Sending response to : [%s] to Port : [%d] \n", addr, B_PORT);
-			n = s_socket->SendTo(&s_in, B_PORT, balancer_seek_msg, strlen(balancer_seek_msg));
+			n = s_socket->SendTo(&s_in, B_PORT, (char *)msgp, strlen(msgp));
 			printf("response sent \n"); 
 		}	
 		else {
@@ -180,6 +184,8 @@ int main(int argc, char* argv[]) {
 	listener_data.r_socket = &r_socket;
 	listener_data.s_socket = &s_socket;
 	 
+
+	MY_IP = argv[1];	
 
 	pthread_create(&listener_balancers, NULL, listen_balancers, (void*)&listener_data); 
 	
