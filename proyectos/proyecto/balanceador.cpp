@@ -8,6 +8,9 @@
 #include <list>
 #include "http_parser.h"
 
+char * MY_IP;
+char * msg; // mensaje a servidores
+
 #define B_PORT 65000
 #define SERVER_PORT 7002
 #define MAXLINE 1024
@@ -74,9 +77,9 @@ void* listen_servers(void * args)
 						{
 							server_list->push_back(server_inf);
 							printf("New Server IP : [%s] - Port : [%d] \n", server_inf->ip_address, server_inf->port);
-							char * msg = (char *)"B/C/127.0.0.1/65000";	//este seria el puerto para que el server me hable por stream, es indiferente.
+							//char * msg = (char *)"B/C/127.0.0.1/65000";	//este seria el puerto para que el server me hable por stream, es indiferente.
 							//int port = ntohs(s_in.sin_port);			//el server no me habla por stream, a menos que yo le pida datos. 
-							int port = B_PORT + 1; // * * 
+							int port = B_PORT; // * * 
 							char * addr = inet_ntoa(s_in.sin_addr);
 							printf("Sending response to : [%s] \n", addr);
 
@@ -237,7 +240,7 @@ void * sendToServer(void * args)
 	
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 	srand(time(NULL));
     Socket rsocket('d', false);		//para recibir cuando los servers se levantan.
@@ -246,8 +249,12 @@ int main()
 
     sockaddr_in s_in;
 
-    char * msg = (char *)"B/C/127.0.0.1/7002";
-    int n = ssocket.SendTo(&s_in, B_PORT + 1, msg, strlen(msg));
+	MY_IP = argv[1];
+	std::string ips(MY_IP);
+	std::string msgs = "B/C/" + ips + "/" + std::to_string(SERVER_PORT);
+	
+    msg = (char *)msgs.c_str();
+    int n = ssocket.SendTo(&s_in, B_PORT, msg, strlen(msg));
 
     if (n != -1)
         printf("Me acabo de levantar, broadcast enviado.\n");
