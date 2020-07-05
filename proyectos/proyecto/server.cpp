@@ -14,9 +14,11 @@
 #define B_PORT 65000
 #define TEST 1
 
+
 //#define RED true
 
 #define LOCAL true
+
 
 char * MY_IP;
 
@@ -88,7 +90,15 @@ void* run(void* data) {
 		perror("there was an error");
 	}
 	printf("Message from client: %s\n", msg_from_client);
-	char* filename = get_file_name(msg_from_client);
+	
+	int head_request = 0; 
+	
+	char* filename = get_file_name(msg_from_client, &head_request);
+
+	if (head_request) {
+		printf("el file name es : %s \n", filename); 
+	}
+	
 	char* response_header; 
 	
 	int option = -1; 
@@ -115,9 +125,13 @@ void* run(void* data) {
 	}
 	
 	if (option == 200) {
+		
+		
 			char* buffer_to_read_file = (char*)calloc(1024, sizeof(char)); 
 			
 			strcpy(buffer_to_read_file, response_header); 
+			
+			
 			int len_header = strlen(buffer_to_read_file);  
 			int read_status = 0;  
 			int bytes_read = 0; 
@@ -134,7 +148,9 @@ void* run(void* data) {
 			else{
 				file_id = open(filename, O_RDONLY);
 			}
-			if (-1 != file_id) {
+			if (-1 != file_id && !head_request) {
+				
+				
 				while(end_read == false) {
 					if (bytes_read != 0) {
 						if((read_status = read(file_id, buffer_to_read_file, 1024)) != 0) {
@@ -155,15 +171,26 @@ void* run(void* data) {
 						bytes_read+= read_status;
 						
 					}	
-				}		
+				}
+				
+				
+						
 			}
 			else {
-				memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 
-				free(response_header);
-				response_header = make_response_header("", 0, 404);
-				thread_data->server_socket->Write(response_header, thread_data->client_id, strlen(response_header)); 
+				if (-1 == file_id) {
+					memset(buffer_to_read_file, 0, 1024 * sizeof(char)); 
+					free(response_header);
+					response_header = make_response_header("", 0, 404);
+					thread_data->server_socket->Write(response_header, thread_data->client_id, strlen(response_header)); 
+				}
+				else {
+					thread_data->server_socket->Write(response_header, thread_data->client_id, strlen(response_header)); 
+				}
 				//aqui sería hacer el 404 not found. 
 			}
+			
+			
+			
 	}
 	else {
 			thread_data->server_socket->Write(response_header, thread_data->client_id, strlen(response_header)); 

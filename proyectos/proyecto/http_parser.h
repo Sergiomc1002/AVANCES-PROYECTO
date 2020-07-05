@@ -20,11 +20,11 @@ extern void set_initial_values(data_arguments_t *data_arguments, char* request);
 
 extern void free_initial_values(data_arguments_t* data_arguments); 
 
-extern char* get_file_name(char* header);
+extern char* get_file_name(char* header, int *head);
 
 extern int get_file_size(char* response_header);
 
-extern char* make_request_header(char* filename);
+extern char* make_request_header(char* filename, bool head);
 
 extern char* make_response_header(char* filename, int content_length, int option);
 

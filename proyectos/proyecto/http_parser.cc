@@ -53,6 +53,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <regex>
+
+
 //#include <string>
 
 /*
@@ -60,8 +62,11 @@
     size: size of the header
     ret: char* with the name of the file requested in the header or error code 404,500,501 etc.   
 */
-char* get_file_name(char* header) {
-	std::regex expression("GET (/([a-zA-Z1-9.])+)* HTTP/1.1\r\n([a-zA-Z .:\r\n])*");
+char* get_file_name(char* header, int *head) {
+	printf("el header es : \n");
+	printf("%s\n", header); 
+	
+	std::regex expression("(GET|HEAD) (/([a-zA-Z1-9.])+)* HTTP/1.1\r\n([a-zA-Z .:\r\n])*");
 	std::regex expression_a("(/([a-zA-Z1-9.])+)* HTTP/1.1\r\n([a-zA-Z .:\r\n])*"); 
 	std::regex number("[1-9]");
 	char* file_name = (char*)calloc(1, FILE_NAME_SIZE);
@@ -122,33 +127,56 @@ char* get_file_name(char* header) {
 		} 	
 	}
 	else {
-		//la entrada es valida. 
-		// Start reading file name from pos 5 (GET /)
-			int counter = 5;
-			int h_size = strlen(header);
-			
+		
+		int counter;
+		int h_size = strlen(header);
+		
+		if (header[0] == 'G') {
+			counter = 5; 
 			while (header[counter] != ' ' && counter < h_size) {
 				file_name[counter - 5] = header[counter];
 				counter++;
 			}
+		}
+		else {
+			*head = 1; 
+			counter = 6; 
+			while (header[counter] != ' ' && counter < h_size) {
+				file_name[counter - 6] = header[counter];
+				counter++;
+			}
+		}
+		
+		//la entrada es valida. 
+		// Start reading file name from pos 5 (GET /)
 	}
+	
 	
     return file_name;
 }
+
 
 /*
     filename: name of the file
     ret: char* header in this format:
     GET /filename HTTP/1.1
 */
-char* make_request_header(char* filename) 
+char* make_request_header(char* filename, bool head) 
 {
     //printf("filename: %s\n", filename);
     char* request_header = (char*)calloc(1, REQUEST_HEADER_SIZE);
 
     // Add Request Function
     int get_len = 5; // "GET /" -> len = 5
-    strcpy(request_header, (char*)"GET /");
+    
+    if (!head) { 
+		strcpy(request_header, (char*)"GET /");
+	}
+	else {
+		get_len = 6; 
+		strcpy(request_header, (char*)"HEAD /");
+	}
+    
     // Add Filename
     int fn_size = strlen(filename);
     strcpy(request_header + get_len, filename);

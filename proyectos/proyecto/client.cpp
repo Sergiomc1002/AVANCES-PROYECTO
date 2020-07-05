@@ -23,14 +23,31 @@ int main( int argc, char * argv[] ) {
 
 	Socket s( 's', false);
 	char* request = argv[1]; 
+	
+	bool head = false; 
+	char* head_request;
+	
+	if (argc == 3) {
+		head_request = argv[2]; 
+		if (strcmp(head_request, "-H") != 0) {
+			printf("la opcion seleccionada no es valida \n");
+			return 0;  
+		} 
+		else {
+			head = true; 
+		}
+	}
+	
 	data_arguments_t *start_values = (data_arguments_t*)calloc(1, sizeof(data_arguments_t)); 
 	set_initial_values(start_values, request); 
+	
 	char* file = (char*)calloc(100, sizeof(char)); 
 	char* name = extract_name(start_values->filename); //recibe el nombre.extension
 	int id_file;     	
 	strcpy(file, name);
-	request = make_request_header(start_values->filename);
-	printf("REQUEST:  %s\n",request);
+	request = make_request_header(start_values->filename, head);
+	printf("REQUEST: %s\n",request);
+	
 	int status_connect = s.Connect(start_values->ip_address, start_values->server_port );
 	
 	int write_status = s.Write(request);
@@ -42,35 +59,40 @@ int main( int argc, char * argv[] ) {
 	bool f_exit = false; 
 	int status_http_protocol = 0; 
 
-
-	
-	while((read_status = s.Read(response, 1024)) > 0 && !f_exit) {
-		if (bytes_read != 0) {
-			bytes_read+= read_status;	
-			write(id_file, response, read_status);
-			memset(response, 0, 1024 * sizeof(char)); 	
-		}
-		else {	
-			status_http_protocol = get_http_status(response, read_status);
-			if (status_http_protocol == 200) {	
-				char* extension = get_file_extension(response);
-				strcat(file, extension);
-				printf("BUILDING FILE : %s\n",file);	
-				id_file = creat(file, S_IRUSR | S_IWUSR);				
-				start_data = get_index_start_data(response, read_status); 
-				int diference = read_status - start_data; 	 
-				bytes_read+= diference; 
-				write(id_file, response+start_data, diference); 
-				memset(response, 0, 1024 * sizeof(char));
+	if (!head) {
+		while((read_status = s.Read(response, 1024)) > 0 && !f_exit) {
+			if (bytes_read != 0) {
+				bytes_read+= read_status;	
+				write(id_file, response, read_status);
+				memset(response, 0, 1024 * sizeof(char)); 	
 			}
-			else {
-				f_exit = true; 
-			}				
+			else {	
+				status_http_protocol = get_http_status(response, read_status);
+				if (status_http_protocol == 200) {	
+					char* extension = get_file_extension(response);
+					strcat(file, extension);
+					printf("BUILDING FILE : %s\n",file);	
+					id_file = creat(file, S_IRUSR | S_IWUSR);				
+					start_data = get_index_start_data(response, read_status); 
+					int diference = read_status - start_data; 	 
+					bytes_read+= diference; 
+					write(id_file, response+start_data, diference); 
+					memset(response, 0, 1024 * sizeof(char));
+				}
+				else {
+					f_exit = true; 
+				}				
+			}
+			printf("read status : %d \n", read_status); 
 		}
-		printf("read status : %d \n", read_status); 
+		
+		if (status_http_protocol == 200) {
+			printf("FILE BUILT\n"); 
+		}
 	}
-	if (status_http_protocol == 200) {
-		printf("FILE BUILT\n"); 
+	else {
+		read_status = s.Read(response, 1024); 
+		printf("%s\n", response); 
 	}
 
 	if (status_http_protocol != 200) {			//ocurrio un error. 
