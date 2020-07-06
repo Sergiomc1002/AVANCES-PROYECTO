@@ -219,7 +219,7 @@ int Socket::Bind( int port, int server_client) {
     return status_bind;
 }
 
-int Socket::ReceiveFrom(sockaddr_in * addr, char* buffer, int bufflen)
+int Socket::receiveFrom(sockaddr_in * addr, char* buffer, int bufflen)
 {
     int n = -1;
     socklen_t len = sizeof(sockaddr_in);
@@ -234,7 +234,7 @@ int Socket::ReceiveFrom(sockaddr_in * addr, char* buffer, int bufflen)
 }
 
 
-int Socket::SendTo(sockaddr_in * addr, int port, char *msg, int msglen) 
+int Socket::sendTo(sockaddr_in * addr, int port, char *msg, int msglen) 
 {
     int n = -1;
     int addrsize = sizeof(sockaddr_in);

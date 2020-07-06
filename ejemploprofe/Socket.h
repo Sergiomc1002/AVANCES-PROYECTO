@@ -20,8 +20,8 @@ class Socket{
         int Accept(struct sockaddr_in6* client_socket_ipv6); 
         void SetIDSocket( int );
 
-        int ReceiveFrom(sockaddr_in * addr, char* buffer, int bufflen);
-        int SendTo(sockaddr_in * addr, int port, char *msg, int msglen);
+        int seceiveFrom(sockaddr_in * addr, char* buffer, int bufflen);
+        int sendTo(sockaddr_in * addr, int port, char *msg, int msglen);
 
         int Shutdown(int client_id); 
         int Shutdown(); 
