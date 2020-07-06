@@ -1,0 +1,95 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 2 (0x2)
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=CR, ST=SJ, L=SanJose, O=UCR-ECCI, OU=Soporte ECCI, CN=vpn.ecci.ucr.ac.cr/name=vpn/emailAddress=soporte@ecci.ucr.ac.cr
+        Validity
+            Not Before: Mar 30 17:34:02 2017 GMT
+            Not After : Mar 28 17:34:02 2027 GMT
+        Subject: C=CR, ST=SJ, L=SanJose, O=UCR-ECCI, OU=Soporte ECCI, CN=ecci/name=ECCI Security/emailAddress=soporte@ecci.ucr.ac.cr
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:bf:62:30:ee:f3:a9:16:b8:2b:a5:b0:67:f7:8f:
+                    89:1b:f5:35:d2:00:8c:fe:b9:20:eb:41:ab:21:4e:
+                    6a:17:f7:37:7a:e4:99:dd:ed:c6:59:6e:f9:80:49:
+                    c4:5b:67:65:b9:c6:e3:b7:de:85:1e:10:0d:da:e3:
+                    7c:81:1a:0c:63:0e:b0:fc:21:cc:30:f3:14:44:69:
+                    8f:6d:ee:36:5a:09:f3:16:46:fb:01:de:a7:c9:1e:
+                    a1:27:22:c0:0a:e5:2c:e0:1d:e5:79:70:9d:20:91:
+                    25:1f:05:f2:94:7e:d3:9b:cd:b1:85:b4:1b:57:77:
+                    03:2e:b2:58:df:c1:d8:a1:5d:08:2e:54:cb:3e:83:
+                    4e:d4:f9:06:c0:5e:34:8e:95:c7:50:b8:5b:8e:bf:
+                    c8:69:14:47:ce:7e:3d:0d:25:79:90:90:c1:ea:3f:
+                    8b:71:47:be:97:bc:87:20:bb:21:41:14:1f:8b:ef:
+                    fa:29:e9:39:5a:99:dc:bf:82:13:91:9e:02:87:8c:
+                    94:5b:ce:3f:02:5d:28:bc:5d:77:ba:f7:18:eb:09:
+                    fc:5e:e3:c0:11:12:c9:9b:85:07:54:33:1e:9a:20:
+                    ab:8b:c0:ca:3b:92:7e:02:98:f7:e0:65:90:f2:2f:
+                    f0:0b:eb:fa:79:8d:a1:73:f4:73:c6:2a:ac:ca:7a:
+                    45:65
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            Netscape Comment: 
+                Easy-RSA Generated Certificate
+            X509v3 Subject Key Identifier: 
+                9E:5B:37:76:B0:1E:BE:0A:28:24:5E:C4:47:66:22:C5:D3:65:B4:77
+            X509v3 Authority Key Identifier: 
+                keyid:1D:C7:DF:F0:64:D5:E3:F2:80:1B:D2:37:E6:87:73:69:7C:8C:FC:3F
+                DirName:/C=CR/ST=SJ/L=SanJose/O=UCR-ECCI/OU=Soporte ECCI/CN=vpn.ecci.ucr.ac.cr/name=vpn/emailAddress=soporte@ecci.ucr.ac.cr
+                serial:93:C6:22:EB:3E:27:E9:88
+
+            X509v3 Extended Key Usage: 
+                TLS Web Client Authentication
+            X509v3 Key Usage: 
+                Digital Signature
+    Signature Algorithm: sha256WithRSAEncryption
+         84:09:e5:ff:dd:35:25:98:b3:ef:c9:56:30:b6:f5:6b:52:3b:
+         1f:af:ce:d4:41:98:8a:46:1a:db:7e:f9:40:c0:7c:dd:2b:6d:
+         d9:f9:c5:53:31:8a:b4:c2:9f:13:ba:79:1d:37:c3:33:82:ad:
+         ef:e4:8f:97:a1:5b:45:9b:1f:97:9e:61:81:47:11:7d:ea:38:
+         f4:9e:d5:cf:26:9d:bb:c3:d3:9b:cb:cf:bc:9d:a9:24:24:bf:
+         ce:db:21:4e:a2:6b:dd:89:61:79:49:2d:21:8f:45:1e:30:c7:
+         01:be:b3:23:68:7d:c8:dc:20:2c:f3:4d:cb:22:fa:1e:80:62:
+         b7:cb:80:aa:ed:17:89:1e:bd:a6:ea:45:40:75:39:25:6e:72:
+         8c:8a:f3:39:53:c7:17:6f:e6:43:99:ff:09:27:35:4e:53:7d:
+         0e:b1:52:22:01:cd:b7:b5:00:f0:90:95:47:6f:a7:2f:63:9f:
+         eb:05:6b:43:b2:4a:dc:ab:69:e3:aa:3e:b9:38:c7:b1:82:f1:
+         c3:70:1b:4b:d6:da:bc:89:82:db:e0:b4:03:21:3a:1e:24:05:
+         ac:ca:be:12:52:79:22:41:53:0b:9a:5b:42:4e:57:d3:5b:ee:
+         ff:9e:83:1d:bb:94:40:75:3f:6b:53:43:98:ca:0e:67:d7:84:
+         61:a2:1b:9a
+-----BEGIN CERTIFICATE-----
+MIIFKjCCBBKgAwIBAgIBAjANBgkqhkiG9w0BAQsFADCBqDELMAkGA1UEBhMCQ1Ix
+CzAJBgNVBAgTAlNKMRAwDgYDVQQHEwdTYW5Kb3NlMREwDwYDVQQKEwhVQ1ItRUND
+STEVMBMGA1UECxMMU29wb3J0ZSBFQ0NJMRswGQYDVQQDExJ2cG4uZWNjaS51Y3Iu
+YWMuY3IxDDAKBgNVBCkTA3ZwbjElMCMGCSqGSIb3DQEJARYWc29wb3J0ZUBlY2Np
+LnVjci5hYy5jcjAeFw0xNzAzMzAxNzM0MDJaFw0yNzAzMjgxNzM0MDJaMIGkMQsw
+CQYDVQQGEwJDUjELMAkGA1UECBMCU0oxEDAOBgNVBAcTB1Nhbkpvc2UxETAPBgNV
+BAoTCFVDUi1FQ0NJMRUwEwYDVQQLEwxTb3BvcnRlIEVDQ0kxDTALBgNVBAMTBGVj
+Y2kxFjAUBgNVBCkTDUVDQ0kgU2VjdXJpdHkxJTAjBgkqhkiG9w0BCQEWFnNvcG9y
+dGVAZWNjaS51Y3IuYWMuY3IwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIB
+AQC/YjDu86kWuCulsGf3j4kb9TXSAIz+uSDrQashTmoX9zd65Jnd7cZZbvmAScRb
+Z2W5xuO33oUeEA3a43yBGgxjDrD8Icww8xREaY9t7jZaCfMWRvsB3qfJHqEnIsAK
+5SzgHeV5cJ0gkSUfBfKUftObzbGFtBtXdwMusljfwdihXQguVMs+g07U+QbAXjSO
+lcdQuFuOv8hpFEfOfj0NJXmQkMHqP4txR76XvIcguyFBFB+L7/op6Tlamdy/ghOR
+ngKHjJRbzj8CXSi8XXe69xjrCfxe48AREsmbhQdUMx6aIKuLwMo7kn4CmPfgZZDy
+L/AL6/p5jaFz9HPGKqzKekVlAgMBAAGjggFfMIIBWzAJBgNVHRMEAjAAMC0GCWCG
+SAGG+EIBDQQgFh5FYXN5LVJTQSBHZW5lcmF0ZWQgQ2VydGlmaWNhdGUwHQYDVR0O
+BBYEFJ5bN3awHr4KKCRexEdmIsXTZbR3MIHdBgNVHSMEgdUwgdKAFB3H3/Bk1ePy
+gBvSN+aHc2l8jPw/oYGupIGrMIGoMQswCQYDVQQGEwJDUjELMAkGA1UECBMCU0ox
+EDAOBgNVBAcTB1Nhbkpvc2UxETAPBgNVBAoTCFVDUi1FQ0NJMRUwEwYDVQQLEwxT
+b3BvcnRlIEVDQ0kxGzAZBgNVBAMTEnZwbi5lY2NpLnVjci5hYy5jcjEMMAoGA1UE
+KRMDdnBuMSUwIwYJKoZIhvcNAQkBFhZzb3BvcnRlQGVjY2kudWNyLmFjLmNyggkA
+k8Yi6z4n6YgwEwYDVR0lBAwwCgYIKwYBBQUHAwIwCwYDVR0PBAQDAgeAMA0GCSqG
+SIb3DQEBCwUAA4IBAQCECeX/3TUlmLPvyVYwtvVrUjsfr87UQZiKRhrbfvlAwHzd
+K23Z+cVTMYq0wp8TunkdN8Mzgq3v5I+XoVtFmx+XnmGBRxF96jj0ntXPJp27w9Ob
+y8+8nakkJL/O2yFOomvdiWF5SS0hj0UeMMcBvrMjaH3I3CAs803LIvoegGK3y4Cq
+7ReJHr2m6kVAdTklbnKMivM5U8cXb+ZDmf8JJzVOU30OsVIiAc23tQDwkJVHb6cv
+Y5/rBWtDskrcq2njqj65OMexgvHDcBtL1tq8iYLb4LQDIToeJAWsyr4SUnkiQVML
+mltCTlfTW+7/noMdu5RAdT9rU0OYyg5n14Rhohua
+-----END CERTIFICATE-----
