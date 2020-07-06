@@ -1,4 +1,16 @@
-output: client server balanceador
+output: client server balanceador bclient bserver
+
+bserver: bserver.o socket.o 
+	g++ bserver.o socket.o -o bserver
+
+bserver.o: bserver.cpp
+	g++ -c bserver.cpp
+
+bclient: bclient.o socket.o 
+	g++ bclient.o socket.o -o bclient
+
+bclient.o: bclient.cpp
+	g++ -c bclient.cpp
 
 server: server.o socket.o http_parser.o
 	g++ server.o socket.o http_parser.o -o server -lpthread
