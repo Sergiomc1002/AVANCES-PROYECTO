@@ -11,9 +11,9 @@
 char * MY_IP;
 char * msg; // mensaje a servidores
 
-#define TEST 1
-//#define RED
-#define LOCAL
+#define TEST 0
+#define RED
+//#define LOCAL
 
 
 #define B_PORT 65000

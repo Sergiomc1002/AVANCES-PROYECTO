@@ -12,12 +12,12 @@
 #include <list>
 #define SERVER_PORT 7000
 #define B_PORT 65000
-#define TEST 1
+#define TEST 0
 
 
-//#define RED true
+#define RED true
 
-#define LOCAL true
+//#define LOCAL true
 
 
 char * MY_IP;
