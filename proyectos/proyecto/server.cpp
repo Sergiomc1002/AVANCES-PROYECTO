@@ -34,6 +34,12 @@ typedef struct {
 	int thread_id; 
 } thread_data_t;
 
+
+
+bool its_a_server(char* msg) {
+	return (msg[0] == 'S'); 
+}
+
 void* listen_balancers(void* data) {
 	listener_data_t* listener_data = (listener_data_t*)data; 
 	Socket* r_socket = listener_data->r_socket; 
@@ -63,7 +69,7 @@ void* listen_balancers(void* data) {
 		memset(&s_in, 0, sizeof(sockaddr_in)); 
 		n = r_socket->ReceiveFrom(&s_in, buffer, 120);
 
-		if (n != -1) {	
+		if (n != -1 && !its_a_server(buffer)) {	
 			ip_port_t* balancer = build_ip_port(buffer); 
 			printf("New Balancer IP : [%s] - Port : [%d] \n", balancer->ip_address, balancer->port); 
 			balancers->push_back(balancer);  			
