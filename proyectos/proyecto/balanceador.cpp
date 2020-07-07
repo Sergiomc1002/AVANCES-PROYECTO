@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
 	
     Socket rsocket('d', false);		//para recibir cuando los servers se levantan.
     Socket ssocket('d', false);		//para avisar cuando yo me levanto. 
-	rsocket.Bind(B_PORT, 0); 
+	rsocket.Bind(B_PORT); 
 	ssocket.EnableBroadcast();
 
 	#ifdef RED

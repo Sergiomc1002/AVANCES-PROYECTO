@@ -14,6 +14,7 @@ class Socket{
         int Write( char *, int id_socket, int);		//para el server escribirle al cliente. 
         int Write(char*); 						//para el cliente escribirle al server. 
         int Listen( int );
+        int Bind(int);
         int Bind( int, int);
         Socket* Accept();
         int Accept(struct sockaddr_in* client_socket);	

@@ -222,7 +222,7 @@ int main(int argc, char* argv[]) {
 	listener_data_t listener_data; 
 	memset(&listener_data, 0, sizeof(listener_data_t));
 	Socket r_socket('d', false);
-	r_socket.Bind(B_PORT+TEST, 0); 
+	r_socket.Bind(B_PORT+TEST); 
 	Socket s_socket('d', false);
 	s_socket.EnableBroadcast();
 	std::list<ip_port_t*> balancers;	 

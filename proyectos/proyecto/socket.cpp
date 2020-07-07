@@ -158,7 +158,16 @@ int Socket::Listen( int queue ) {
     return status;
 }
 
+int Socket::Bind(int port)
+{
+	sockaddr_in addr;
+	memset(&addr, 0, sizeof(sockaddr_in));
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_port = htons(port);
 
+	return bind(id, (const struct sockaddr *)&addr, sizeof(addr));
+}
 
 int Socket::Bind( int port, int server_client) {
 	int status = 0; 
