@@ -15,6 +15,7 @@
 int main() { 
 	int sockfd; 
 	char buffer[MAXLINE]; 
+	int broadcast = 1;
 	char *hello = "Hello from client"; 
 	struct sockaddr_in	 servaddr; 
 
@@ -23,6 +24,8 @@ int main() {
 		perror("socket creation failed"); 
 		exit(EXIT_FAILURE); 
 	} 
+
+	setsockopt( sockfd, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof( broadcast ) );
 
 	memset(&servaddr, 0, sizeof(servaddr)); 
 	
