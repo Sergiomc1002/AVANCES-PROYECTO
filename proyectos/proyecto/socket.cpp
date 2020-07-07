@@ -258,6 +258,30 @@ int Socket::SendTo(sockaddr_in * addr, int port, char *msg, int msglen)
     return n;
 }
 
+int Socket::SendTo(char * ipadder, sockaddr_in * addr, int port, char *msg, int msglen) 
+{
+    int n = -1;
+    int addrsize = sizeof(sockaddr_in);
+
+    memset(addr, 0, addrsize);
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons(port);
+    //addr->sin_addr.s_addr = INADDR_ANY;
+    if (inet_aton(ipadder, &(addr->sin_addr)) == 0)
+    {
+        printf("sendto: could not convert address: %s\n", ipadder);
+        return n;
+    }
+
+    n = sendto(id, msg, msglen, MSG_CONFIRM, (const struct sockaddr *)addr, addrsize);
+    if (n == -1)
+    {
+        perror("sendTo");
+    }
+
+    return n;
+}
+
 int Socket::Accept(struct sockaddr_in* client_socket) {
 		
 	char addrs_client[INET_ADDRSTRLEN];

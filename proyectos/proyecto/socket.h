@@ -22,6 +22,7 @@ class Socket{
 
         int ReceiveFrom(sockaddr_in * addr, char* buffer, int bufflen);
         int SendTo(sockaddr_in * addr, int port, char *msg, int msglen);
+        int SendTo(char * ipadder, sockaddr_in * addr, int port, char *msg, int msglen);
 
         int Shutdown(int client_id); 
         int Shutdown(); 

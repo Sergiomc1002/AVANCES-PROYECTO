@@ -29,8 +29,14 @@ int main() {
 	// Filling server information 
 	servaddr.sin_family = AF_INET; 
 	servaddr.sin_port = htons(PORT); 
-	servaddr.sin_addr.s_addr = INADDR_ANY; 
-	
+	//servaddr.sin_addr.s_addr = INADDR_ANY; 
+	char * baddr = "172.16.123.31";
+	if (inet_aton(baddr, &(servaddr.sin_addr)) == 0)
+    {
+        printf("sendto: could not convert address: %s\n", baddr);
+        return 0;
+    }
+
 	socklen_t len; 
 	int n;
 	
