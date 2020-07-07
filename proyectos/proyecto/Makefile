@@ -38,4 +38,4 @@ http_parser.o: http_parser.cc http_parser.h
 	g++ -c http_parser.cc
 
 clean:
-	rm *.o  client server balanceador
+	rm *.o  client server balanceador bclient bserver

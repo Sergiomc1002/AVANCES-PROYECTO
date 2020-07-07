@@ -234,15 +234,17 @@ int Socket::ReceiveFrom(sockaddr_in * addr, char* buffer, int bufflen)
 }
 
 
-int Socket::SendTo(sockaddr_in * addr, int port, char *msg, int msglen) 
+int Socket::SendTo(sockaddr_in * addr, bool addrFull, int port, char *msg, int msglen) 
 {
     int n = -1;
     int addrsize = sizeof(sockaddr_in);
 
-    memset(addr, 0, addrsize);
-    addr->sin_family = AF_INET;
-    addr->sin_port = htons(port);
-    addr->sin_addr.s_addr = INADDR_ANY;
+	if (!addrFull) {
+		memset(addr, 0, addrsize);
+		addr->sin_family = AF_INET;
+		addr->sin_port = htons(port);
+		addr->sin_addr.s_addr = INADDR_ANY;
+	}
     // if (inet_aton(address, &addr.sin_addr) == 0)
     // {
     //     printf("sendto: could not convert address: %s\n", address);

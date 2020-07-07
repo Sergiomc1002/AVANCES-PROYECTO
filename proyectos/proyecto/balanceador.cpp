@@ -102,7 +102,7 @@ void* listen_servers(void * args)
 							char * addr = inet_ntoa(s_in.sin_addr);
 							printf("Sending response to : [%s] \n", addr);
 
-							s_socket->SendTo(&s_in, port, msg, strlen(msg));
+							s_socket->SendTo(&s_in, true, port, msg, strlen(msg));
 						}
 						else {
 							//free(server_inf);
