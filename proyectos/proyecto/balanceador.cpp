@@ -273,6 +273,7 @@ int main(int argc, char* argv[])
     Socket rsocket('d', false);		//para recibir cuando los servers se levantan.
     Socket ssocket('d', false);		//para avisar cuando yo me levanto. 
 	rsocket.Bind(B_PORT, 0); 
+	ssocket.EnableBroadcast();
 
 	#ifdef RED
 		if (argc != 2) {
@@ -293,7 +294,7 @@ int main(int argc, char* argv[])
 		char * msg = (char *)"B/C/127.0.0.1/7002";
     #endif
     
-    int n = ssocket.SendTo(&s_in, B_PORT + TEST, msg, strlen(msg));
+    int n = ssocket.SendTo((char *)"172.16.123.31", &s_in, B_PORT + TEST, msg, strlen(msg));
 
     if (n != -1)
         printf("Me acabo de levantar, broadcast enviado.\n");

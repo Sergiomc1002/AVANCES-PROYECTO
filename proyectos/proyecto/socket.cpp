@@ -282,6 +282,12 @@ int Socket::SendTo(char * ipadder, sockaddr_in * addr, int port, char *msg, int 
     return n;
 }
 
+void Socket::EnableBroadcast()
+{
+	int broadcast = 1;
+	setsockopt(id, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof( broadcast ) );
+}
+
 int Socket::Accept(struct sockaddr_in* client_socket) {
 		
 	char addrs_client[INET_ADDRSTRLEN];

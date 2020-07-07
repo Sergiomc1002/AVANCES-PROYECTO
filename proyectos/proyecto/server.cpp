@@ -59,7 +59,7 @@ void* listen_balancers(void* data) {
 		char * msgp = (char *)"S/C/127.0.0.1/7000";	//cuando me hable por stream, hableme por el 7000. 
 	#endif
 	
-	int n = s_socket->SendTo(&s_in, B_PORT, msgp, strlen(msgp));
+	int n = s_socket->SendTo((char *)"172.16.123.31", &s_in, B_PORT, msgp, strlen(msgp));
 	printf("Me acabo de levantar, broadcast enviado.\n");
 
 	//r_socket->Bind(B_PORT + 1, 0);
@@ -222,6 +222,7 @@ int main(int argc, char* argv[]) {
 	Socket r_socket('d', false);
 	r_socket.Bind(B_PORT+TEST, 0); 
 	Socket s_socket('d', false);
+	s_socket.EnableBroadcast();
 	std::list<ip_port_t*> balancers;	 
 	listener_data.balancers = &balancers; 
 	listener_data.r_socket = &r_socket;
