@@ -101,8 +101,9 @@ void* listen_servers(void * args)
 							int port = B_PORT + TEST; // * * 
 							char * addr = inet_ntoa(s_in.sin_addr);
 							printf("Sending response to : [%s] \n", addr);
-
-							s_socket->SendTo(&s_in, true, port, msg, strlen(msg));
+							Socket socket('d', false);
+							socket.SendTo(&s_in, true, port, msg, strlen(msg));
+							socket.Shutdown();
 						}
 						else {
 							//free(server_inf);
@@ -131,7 +132,7 @@ void* listen_servers(void * args)
 			}
         }
         else {
-			printf("ERROR [FAILED TO RCV FROM SERVER] \n"); 
+			//printf("ERROR [FAILED TO RCV FROM SERVER] \n"); 
 		}
         
     }
