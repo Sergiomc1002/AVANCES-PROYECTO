@@ -75,11 +75,15 @@ void* listen_balancers(void* data) {
 			balancers->push_back(balancer);  			
 			// send	
 			char * addr = inet_ntoa(s_in.sin_addr);
-			printf("Sending response to : [%s] to Port : [%d] \n", addr, B_PORT);
-			Socket socket('d', false);
-			n = socket.SendTo(&s_in, true,B_PORT, msgp, strlen(msgp));
+			int port = B_PORT;
+			sockaddr_in estructure;
+			//printf("Sending response to : [%s] to Port : [%d] \n", addr, B_PORT);
+printf("-----------RESPONDIENDO------PUERTO: %d\n",port);
+printf("-----------RESPONDIENDO------DIRECCION: %s\n",addr);
+			Socket socket1('d', false);
+			n = socket1.SendTo(addr,&estructure,port, msgp, strlen(msgp));
 			printf("response sent \n"); 
-			socket.Shutdown();
+			socket1.Shutdown();
 		}	
 		else {
 			//printf("ERROR: no se pudo encontrar balanceador en la red \n");
