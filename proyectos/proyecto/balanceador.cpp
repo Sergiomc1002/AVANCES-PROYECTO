@@ -56,13 +56,13 @@ typedef struct
 
 bool new_server(std::list<ip_port_t*> * server_list, ip_port_t * server_inf)
 {
-    // std::list<ip_port_t*>::iterator it = server_list->begin();
-    // while(it != server_list->end())
-    // {
-    //     if (strcmp((*it)->ip_address, server_inf->ip_address) == 0)
-    //         return false;
-    //     it++;
-    // }
+    std::list<ip_port_t*>::iterator it = server_list->begin();
+    while(it != server_list->end())
+    {
+         if (strcmp((*it)->ip_address, server_inf->ip_address) == 0 && (*it)->port == server_inf->port)
+             return false;
+         it++;
+    }
 	int peso = 1 + rand() % 3;
 	printf("Peso nuevo servidor: %d\n", peso); 
 	server_weigths.push_back(peso);
@@ -144,14 +144,14 @@ void* listen_servers(void * args)
 							//int port = ntohs(s_in.sin_port);			//el server no me habla por stream, a menos que yo le pida datos. 
 							int port = B_PORT + TEST; // * * 
 							char * addr = inet_ntoa(s_in.sin_addr);
-							printf("Sending response to : [%s] \n", addr);
+							//printf("Sending response to : [%s] \n", addr);
 							Socket socket('d', false);
 							// 1. old way
 							//socket.SendTo(&s_in, true, port, msg, strlen(msg));
 							// 2. new way
 							sockaddr_in socka;
-							socket.SendTo(addr, &socka, port, msg, strlen(msg));
-							
+							//socket.SendTo(addr, &socka, port, msg, strlen(msg));
+
 							socket.Shutdown();
 						}
 						else {
