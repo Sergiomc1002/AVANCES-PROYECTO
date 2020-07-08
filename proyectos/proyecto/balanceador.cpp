@@ -87,7 +87,7 @@ void* listen_servers(void * args)
 			ip_port_t * server_inf = build_ip_port(buffer);
 			if (server_inf != NULL) {
 				if (is_it_a_connect_msg(buffer)) {
-					
+						printf("Si es msg conn\n");					
 						if (new_server(server_list, server_inf)) 
 						{
 							server_list->push_back(server_inf);
