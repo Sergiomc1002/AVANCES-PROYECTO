@@ -104,7 +104,7 @@ printf("-----------RESPONDIENDO------DIRECCION: %s\n",addr);
 							//printf("Sending response to : [%s] \n", addr);
 							sockaddr_in estructure;
 							Socket socket1('d', false);
-							socket1.SendTo(addr,&estructure, true, port, msg, strlen(msg));
+							socket1.SendTo(addr,&estructure,port, msg, strlen(msg));
 							socket1.Shutdown();
 						}
 						else {
