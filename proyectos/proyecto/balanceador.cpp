@@ -10,6 +10,7 @@
 
 char * MY_IP;
 char * msg; // mensaje a servidores
+int protocol;
 
 #define TEST 0
 #define RED
@@ -31,11 +32,19 @@ using namespace std;
 int numServers = 0;
 std::list<int> server_weigths;
 
+typedef struct
+{
+	ip_port_t * server;
+	char * clientIp;
+} cs_pair_t;
+
+std::list<cs_pair_t *> cs_pair_list; // lista de asignacion cliente -> servidor 
 
 typedef struct {
 	Socket *server_socket;
 	int client_id;
     std::list<ip_port_t*> * server_list;
+	char * client_ip;
 } sthread_data;
 
 typedef struct
@@ -54,9 +63,45 @@ bool new_server(std::list<ip_port_t*> * server_list, ip_port_t * server_inf)
     //         return false;
     //     it++;
     // }
+	int peso = 1 + rand() % 3;
+	printf("Peso nuevo servidor: %d\n", peso); 
+	server_weigths.push_back(peso);
+	numServers++;
     return true;
 }
 
+int lastServerIndex = 0;
+void set_client_server(char * client_ip, std::list<ip_port_t*> * server_list)
+{
+	printf("Client ID: %s\n", client_ip);
+	bool newClient = true;
+
+	std::list<cs_pair_t *>::iterator it = cs_pair_list.begin();
+	while (it != cs_pair_list.end())
+	{
+		printf("Comparando: C %s - NC %s\n", (*it)->clientIp, client_ip);
+		if (strcmp((*it)->clientIp, client_ip) == 0)
+			newClient = false;
+		it++;
+	}
+
+	if (newClient)
+	{
+		cs_pair_t * cs_pair = (cs_pair_t *)calloc(1, sizeof(cs_pair_t));
+		cs_pair->clientIp = client_ip;
+		std::list<ip_port_t*>::iterator it = server_list->begin();
+		int i = 0;
+    	while(it != server_list->end() &&  i < lastServerIndex){
+			it++;
+		}
+		cs_pair->server = *it;
+
+		cs_pair_list.push_back(cs_pair);
+		lastServerIndex = (lastServerIndex + 1) % numServers;
+		printf("Nuevo Cliente:\n");
+		printf("Client IP: %s Server IP: %s\n", client_ip, (*it)->ip_address);
+	}
+}
 
 
 bool its_a_balancer(char* msg) {
@@ -71,8 +116,6 @@ void* listen_servers(void * args)
     Socket * s_socket = ar->s_socket;
     std::list<ip_port_t*> * server_list = ar->server_list;
 
-    //int r = r_socket->Bind(B_PORT, 0);
-
     sockaddr_in s_in;			//cuando recibo se llena de la info. 
     int buff_size = 120;
     char buffer[buff_size];
@@ -80,7 +123,8 @@ void* listen_servers(void * args)
     while(true) {
         memset(buffer, 0, buff_size);
         int n = r_socket->ReceiveFrom(&s_in, buffer, buff_size);
-
+		printf("Esperando mensaje n: %d\n", n);
+		printf("%s\n", buffer);
         //if (n != -1) {
         if (n != -1 && !its_a_balancer(buffer)) {
 			printf("Protocol[MSG from Server]: %s\n", buffer);
@@ -148,10 +192,11 @@ ip_port_t * roundRobin(list<ip_port_t*> * server_list){
 	int index = roundRobinIndex;
 	int i = 0;
 	
-	roundRobinIndex = (roundRobinIndex+1)%numServers;
+	roundRobinIndex = (roundRobinIndex +1 ) % numServers;
+
 	std::list<ip_port_t*>::iterator it = server_list->begin();
     while(it != server_list->end() &&  i < roundRobinIndex){
-        it++;
+		it++;
 		i++;
     }
 	temp = *it;
@@ -169,10 +214,11 @@ ip_port_t * roundRobinPesos(list<ip_port_t*> * server_list){
 	
 	std::list<ip_port_t*>::iterator it = server_list->begin();
 	std::list<int>::iterator itWeight = server_weigths.begin();
+	
 	for(int i = 0; i < roundRobinWeigthIndex; ++i){
 		itWeight++;
 	}
-	
+
 	if(weigthCounter < *(itWeight)){
 		weigthCounter++;
 	}
@@ -181,41 +227,60 @@ ip_port_t * roundRobinPesos(list<ip_port_t*> * server_list){
 		roundRobinWeigthIndex = (roundRobinWeigthIndex+1)%numServers;
 	}
 	
-	temp = *(it);
-	temp+=roundRobinWeigthIndex;
+	for(int i = 0; i < roundRobinWeigthIndex; ++i){
+		it++;
+	}
+
+	temp = *it;
 	
 	if(temp == NULL){
-		printf("ERROR EN ROUNDROBIN \n");
+		printf("ERROR EN ROUNDROBINPESOS \n");
 	}
 	return temp;
 }
 
-ip_port_t * dirClient(){
-	
-	
-	
+ip_port_t * dirClient(char * client_ip){
+	std::list<cs_pair_t *>::iterator it = cs_pair_list.begin();
+	ip_port_t * temp = NULL;
+
+	while(it != cs_pair_list.end())
+	{
+		if (strcmp((*it)->clientIp, client_ip) == 0)
+		{
+			temp = (*it)->server;
+			break;
+		}
+		it++;
+	}
+
+	if (temp == NULL)
+	{
+		printf("ERROR EN DIRCLIENT\n");
+	}
+
+	return temp;
 }
 
 ip_port_t * lessConnections(){
+	ip_port_t * temp = NULL;
 	
-	
-	
+	return temp;
 }
-ip_port_t * getServer(int algorithm , list<ip_port_t*> * server_list){
+ip_port_t * getServer(int algorithm , sthread_data* thread_data){
 	ip_port_t * temp;
 	switch(algorithm){
 		case ROUNDROBINPESOS:
-			temp = roundRobinPesos(server_list);
+			temp = roundRobinPesos(thread_data->server_list);
 			break;
 		case DIRCLIENT:
-			temp = dirClient();
+			temp = dirClient(thread_data->client_ip);
 			break;
 		case LESSCONNECTIONS:
 			temp = lessConnections();
 			break;
 		default:
 			//ROUNDROBIN
-			temp = roundRobin(server_list);
+			temp = roundRobin(thread_data->server_list);
 			break;
 	}
 	return temp;
@@ -234,6 +299,9 @@ void * sendToServer(void * args)
     Socket * s = thread_data->server_socket;
     std::list<ip_port_t*> * server_list = thread_data->server_list;
 
+	if (protocol == DIRCLIENT)
+		set_client_server(thread_data->client_ip, server_list);
+
     if(-1 == s->Read(msg_from_client,512,thread_data->client_id)) {
 		perror("there was an error");
         return NULL;
@@ -241,8 +309,8 @@ void * sendToServer(void * args)
     printf("Message from client: %s - getting ready to send it to a server ...\n", msg_from_client);
 
     //ip_port_t * server = chooseServer();
-    ip_port_t * server = *(server_list->begin());
-    //ip_port_t * server = getServer(ROUNDROBIN, server_list);
+    //ip_port_t * server = *(server_list->begin());
+    ip_port_t * server = getServer(protocol, thread_data);
 	
 	//imprimir el server que eligio
 	printf("Server IP : [%s] - Port : [%d] \n", server->ip_address, server->port);
@@ -280,7 +348,7 @@ int main(int argc, char* argv[])
 	ssocket.EnableBroadcast();
 
 	#ifdef RED
-		if (argc != 2) {
+		if (argc != 3) {
 			printf("parametros invalidos \n");
 			return 0;  
 		}
@@ -290,6 +358,8 @@ int main(int argc, char* argv[])
 		std::string msgs = "B/C/" + ips + "/" + std::to_string(SERVER_PORT);
 		
 		msg = (char *)msgs.c_str();
+
+		protocol = atoi(argv[2]);
 	#endif
 
     sockaddr_in s_in;
@@ -325,9 +395,9 @@ int main(int argc, char* argv[])
 
     while(1) {
 
-		struct sockaddr_in socket_client;
+		struct sockaddr_in * socket_client = (sockaddr_in *)calloc(1, sizeof(sockaddr_in));
 
-		int client_id = server_socket.Accept(&socket_client);
+		int client_id = server_socket.Accept(socket_client);
 		
 		if (-1 == client_id) {
 			perror("something went wrong");
@@ -337,6 +407,7 @@ int main(int argc, char* argv[])
 			sd->server_socket = &server_socket;
 			sd->client_id = client_id;  
             sd->server_list = &server_list;
+			sd->client_ip = inet_ntoa(socket_client->sin_addr);
 			pthread_t* thread = (pthread_t*)malloc(1*sizeof(pthread_t)); 
 
 			pthread_create(thread, NULL, sendToServer, sd); 
