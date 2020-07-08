@@ -77,7 +77,13 @@ void* listen_balancers(void* data) {
 			char * addr = inet_ntoa(s_in.sin_addr);
 			printf("Sending response to : [%s] to Port : [%d] \n", addr, B_PORT);
 			Socket socket('d', false);
-			n = socket.SendTo(&s_in, true,B_PORT, msgp, strlen(msgp));
+			
+			// 1. old way
+			//n = socket.SendTo(&s_in, true,B_PORT, msgp, strlen(msgp));
+			// 2 . new way
+			sockaddr_in socka;
+			socket.SendTo(addr, &socka, B_PORT, msgp, strlen(msgp));
+
 			printf("response sent \n"); 
 			socket.Shutdown();
 		}	

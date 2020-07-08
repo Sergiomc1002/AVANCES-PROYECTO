@@ -353,7 +353,7 @@ void Socket::SetIDSocket(int id){
 }
 
 int Socket::Shutdown() {
-	printf("CONECTION CLOSED\n");
+	//printf("CONECTION CLOSED\n");
 	return close(this->id);
 	
 }

@@ -146,7 +146,12 @@ void* listen_servers(void * args)
 							char * addr = inet_ntoa(s_in.sin_addr);
 							printf("Sending response to : [%s] \n", addr);
 							Socket socket('d', false);
-							socket.SendTo(&s_in, true, port, msg, strlen(msg));
+							// 1. old way
+							//socket.SendTo(&s_in, true, port, msg, strlen(msg));
+							// 2. new way
+							sockaddr_in socka;
+							socket.SendTo(addr, &socka, port, msg, strlen(msg));
+							
 							socket.Shutdown();
 						}
 						else {
