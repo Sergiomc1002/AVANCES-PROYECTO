@@ -88,22 +88,24 @@ void* listen_servers(void * args)
 			if (server_inf != NULL) {
 				if (is_it_a_connect_msg(buffer)) {
 						printf("Si es msg conn\n");					
-						if (new_server(server_list, server_inf)) 
-						{
+						if (new_server(server_list, server_inf)){
 							server_list->push_back(server_inf);
 							printf("New Server IP : [%s] - Port : [%d] \n", server_inf->ip_address, server_inf->port);
-							
+printf("-------RECIBIO UN SERVIDOR-------\n");
 							#ifdef LOCAL
 								char * msg = (char *)"B/C/127.0.0.1/65000";	//este seria el puerto para que el server me hable por stream, es indiferente.
 							#endif 
 							
 							//int port = ntohs(s_in.sin_port);			//el server no me habla por stream, a menos que yo le pida datos. 
 							int port = B_PORT + TEST; // * * 
+printf("-----------RESPONDIENDO------PUERTO: %d\n",port);
 							char * addr = inet_ntoa(s_in.sin_addr);
-							printf("Sending response to : [%s] \n", addr);
-							Socket socket('d', false);
-							socket.SendTo(&s_in, true, port, msg, strlen(msg));
-							socket.Shutdown();
+printf("-----------RESPONDIENDO------DIRECCION: %s\n",addr);
+							//printf("Sending response to : [%s] \n", addr);
+							sockaddr_in estructure;
+							Socket socket1('d', false);
+							socket1.SendTo(addr,&estructure, true, port, msg, strlen(msg));
+							socket1.Shutdown();
 						}
 						else {
 							//free(server_inf);
@@ -300,9 +302,9 @@ int main(int argc, char* argv[])
     
     int n = ssocket.SendTo((char *)"172.16.123.31", &s_in, B_PORT + TEST, msg, strlen(msg));
 
-    if (n != -1)
+    if (n != -1){
         printf("Me acabo de levantar, broadcast enviado.\n");
-
+	}
     pthread_t ls_thread;
     std::list<ip_port_t*> server_list;
     lthread_args args;

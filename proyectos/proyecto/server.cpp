@@ -50,8 +50,8 @@ void* listen_balancers(void* data) {
 	char buffer[120];
 
 	#ifdef RED
-	std::string ips(MY_IP);
-	std::string balancer_seek_msg = "S/C/" + ips + "/" + std::to_string(SERVER_PORT);
+		std::string ips(MY_IP);
+		std::string balancer_seek_msg = "S/C/" + ips + "/" + std::to_string(SERVER_PORT);
 		char * msgp = (char*)balancer_seek_msg.c_str();
 	#endif
 	
@@ -238,7 +238,8 @@ int main(int argc, char* argv[]) {
 		MY_IP = argv[1];
 		SERVER_PORT = atoi(argv[2]);	
 	#endif
-
+	
+	//AQUI DEBERIA MANDAR EL BROADCAST
 
 
 	pthread_create(&listener_balancers, NULL, listen_balancers, (void*)&listener_data); 
