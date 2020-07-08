@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 #include "http_parser.h"
 #include <list>
-#define SERVER_PORT 7000
+int SERVER_PORT = 7000;
 #define B_PORT 65000
 #define TEST 0
 
@@ -231,11 +231,12 @@ int main(int argc, char* argv[]) {
 	listener_data.s_socket = &s_socket;
 
 	#ifdef RED
-		if (argc != 2) {
+		if (argc != 3) {
 			printf("parametros invalidos \n");
 			return 0;  
 		}
-		MY_IP = argv[1];	
+		MY_IP = argv[1];
+		SERVER_PORT = atoi(argv[2]);	
 	#endif
 
 
