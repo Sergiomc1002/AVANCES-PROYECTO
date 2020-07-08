@@ -47,13 +47,13 @@ typedef struct
 
 bool new_server(std::list<ip_port_t*> * server_list, ip_port_t * server_inf)
 {
-    std::list<ip_port_t*>::iterator it = server_list->begin();
-    while(it != server_list->end())
-    {
-        if (strcmp((*it)->ip_address, server_inf->ip_address) == 0)
-            return false;
-        it++;
-    }
+    // std::list<ip_port_t*>::iterator it = server_list->begin();
+    // while(it != server_list->end())
+    // {
+    //     if (strcmp((*it)->ip_address, server_inf->ip_address) == 0)
+    //         return false;
+    //     it++;
+    // }
     return true;
 }
 
