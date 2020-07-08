@@ -241,8 +241,8 @@ void * sendToServer(void * args)
     printf("Message from client: %s - getting ready to send it to a server ...\n", msg_from_client);
 
     //ip_port_t * server = chooseServer();
-    //ip_port_t * server = *(server_list->begin());
-    ip_port_t * server = getServer(ROUNDROBIN, server_list);
+    ip_port_t * server = *(server_list->begin());
+    //ip_port_t * server = getServer(ROUNDROBIN, server_list);
 	
 	//imprimir el server que eligio
 	printf("Server IP : [%s] - Port : [%d] \n", server->ip_address, server->port);
