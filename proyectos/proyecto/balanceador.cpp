@@ -31,6 +31,7 @@ int protocol;
 using namespace std;
 int numServers = 0;
 std::list<int> server_weigths;
+std::list<int> server_request;
 
 typedef struct
 {
@@ -63,9 +64,20 @@ bool new_server(std::list<ip_port_t*> * server_list, ip_port_t * server_inf)
              return false;
          it++;
     }
-	int peso = 1 + rand() % 3;
-	printf("Peso nuevo servidor: %d\n", peso); 
-	server_weigths.push_back(peso);
+
+	if(protocol == ROUNDROBINPESOS)
+	{
+		int peso = 1 + rand() % 3;
+		printf("Peso nuevo servidor: %d\n", peso); 
+		server_weigths.push_back(peso);
+	}
+	else if (protocol == LESSCONNECTIONS)
+	{
+		int solicitudes = 1 + rand() % 20;
+		printf("Solicitudes iniciales servidor: %d\n", solicitudes);
+		server_request.push_back(solicitudes);
+	}
+
 	numServers++;
     return true;
 }
@@ -73,13 +85,12 @@ bool new_server(std::list<ip_port_t*> * server_list, ip_port_t * server_inf)
 int lastServerIndex = 0;
 void set_client_server(char * client_ip, std::list<ip_port_t*> * server_list)
 {
-	printf("Client ID: %s\n", client_ip);
 	bool newClient = true;
 
 	std::list<cs_pair_t *>::iterator it = cs_pair_list.begin();
+
 	while (it != cs_pair_list.end())
 	{
-		printf("Comparando: C %s - NC %s\n", (*it)->clientIp, client_ip);
 		if (strcmp((*it)->clientIp, client_ip) == 0)
 			newClient = false;
 		it++;
@@ -88,18 +99,22 @@ void set_client_server(char * client_ip, std::list<ip_port_t*> * server_list)
 	if (newClient)
 	{
 		cs_pair_t * cs_pair = (cs_pair_t *)calloc(1, sizeof(cs_pair_t));
-		cs_pair->clientIp = client_ip;
-		std::list<ip_port_t*>::iterator it = server_list->begin();
+		//cs_pair->clientIp = client_ip;
+		cs_pair->clientIp = (char *)calloc(100, sizeof(char));
+		strcpy(cs_pair->clientIp, client_ip);
+		std::list<ip_port_t*>::iterator its = server_list->begin();
 		int i = 0;
-    	while(it != server_list->end() &&  i < lastServerIndex){
-			it++;
+    	while(its != server_list->end() &&  i < lastServerIndex){
+			its++;
+			i++;
 		}
-		cs_pair->server = *it;
+
+		cs_pair->server = *its;
 
 		cs_pair_list.push_back(cs_pair);
 		lastServerIndex = (lastServerIndex + 1) % numServers;
 		printf("Nuevo Cliente:\n");
-		printf("Client IP: %s Server IP: %s\n", client_ip, (*it)->ip_address);
+		printf("Client IP: %s Server IP: %s\n", client_ip, (*its)->ip_address);
 	}
 }
 
@@ -130,33 +145,11 @@ void* listen_servers(void * args)
 			printf("Protocol[MSG from Server]: %s\n", buffer);
 			ip_port_t * server_inf = build_ip_port(buffer);
 			if (server_inf != NULL) {
-				if (is_it_a_connect_msg(buffer)) {
-						printf("Si es msg conn\n");					
+				if (is_it_a_connect_msg(buffer)) {				
 						if (new_server(server_list, server_inf)) 
 						{
 							server_list->push_back(server_inf);
 							printf("New Server IP : [%s] - Port : [%d] \n", server_inf->ip_address, server_inf->port);
-							
-							#ifdef LOCAL
-								char * msg = (char *)"B/C/127.0.0.1/65000";	//este seria el puerto para que el server me hable por stream, es indiferente.
-							#endif 
-							
-							//int port = ntohs(s_in.sin_port);			//el server no me habla por stream, a menos que yo le pida datos. 
-							int port = B_PORT + TEST; // * * 
-							char * addr = inet_ntoa(s_in.sin_addr);
-							//printf("Sending response to : [%s] \n", addr);
-							Socket socket('d', false);
-							// 1. old way
-							//socket.SendTo(&s_in, true, port, msg, strlen(msg));
-							// 2. new way
-							sockaddr_in socka;
-							//socket.SendTo(addr, &socka, port, msg, strlen(msg));
-
-							socket.Shutdown();
-						}
-						else {
-							//free(server_inf);
-							//se le hace free a server_inf
 						}
 				}
 				else {
@@ -266,11 +259,39 @@ ip_port_t * dirClient(char * client_ip){
 	return temp;
 }
 
-ip_port_t * lessConnections(){
-	ip_port_t * temp = NULL;
-	
+ip_port_t * lessConnections(list<ip_port_t*> * server_list){
+	std::list<ip_port_t*>::iterator sit = server_list->begin();
+	ip_port_t * temp = *sit;
+	std::list<int>::iterator rit = server_request.begin();
+	std::list<int>::iterator min_rit = rit;
+	int minRequest = *rit;
+	rit++;
+	sit++;
+	printf("\n\nlessConnections:\n");
+	while(rit != server_request.end())
+	{
+		if (*rit < minRequest)
+		{
+			min_rit = rit;
+			minRequest = *rit;
+			temp = *sit;
+		}
+		sit++;
+		rit++;
+	}
+
+	if (temp == NULL) {
+		printf("ERROR LESSCONNECTIONS\n");
+		printf("\n\n");
+		return NULL;
+	}
+	(*min_rit)++;
+	printf("solicitudes servidor: %d\n", *min_rit);
+	printf("\n\n");
+
 	return temp;
 }
+
 ip_port_t * getServer(int algorithm , sthread_data* thread_data){
 	ip_port_t * temp;
 	switch(algorithm){
@@ -281,7 +302,7 @@ ip_port_t * getServer(int algorithm , sthread_data* thread_data){
 			temp = dirClient(thread_data->client_ip);
 			break;
 		case LESSCONNECTIONS:
-			temp = lessConnections();
+			temp = lessConnections(thread_data->server_list);
 			break;
 		default:
 			//ROUNDROBIN
@@ -297,6 +318,8 @@ ip_port_t * getServer(int algorithm , sthread_data* thread_data){
 
 void * sendToServer(void * args)
 {
+	printf("Nueva solicitud cliente:\n");
+
 	Socket server_socket('s',false);
     char* msg_from_client = (char*)calloc(512, sizeof(char));  
 
@@ -376,7 +399,7 @@ int main(int argc, char* argv[])
     int n = ssocket.SendTo((char *)"172.16.123.31", &s_in, B_PORT + TEST, msg, strlen(msg));
 
     if (n != -1)
-        printf("Me acabo de levantar, broadcast enviado.\n");
+        printf("Broadcast enviado.\n");
 
     pthread_t ls_thread;
     std::list<ip_port_t*> server_list;

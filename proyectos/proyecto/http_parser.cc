@@ -66,8 +66,8 @@ char* get_file_name(char* header, int *head) {
 	printf("el header es : \n");
 	printf("%s\n", header); 
 	
-	std::regex expression("(GET|HEAD) (/([a-zA-Z1-9.])+)* HTTP/1.1\r\n([a-zA-Z .:\r\n])*");
-	std::regex expression_a("(/([a-zA-Z1-9.])+)* HTTP/1.1\r\n([a-zA-Z .:\r\n])*"); 
+	std::regex expression("(GET|HEAD) (/([a-zA-Z1-9.-_])+)* HTTP/1.1\r\n([a-zA-Z .:\r\n])*");
+	std::regex expression_a("(/([a-zA-Z1-9.-_])+)* HTTP/1.1\r\n([a-zA-Z .:\r\n])*"); 
 	std::regex number("[1-9]");
 	char* file_name = (char*)calloc(1, FILE_NAME_SIZE);
 	
