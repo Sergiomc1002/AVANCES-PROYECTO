@@ -1,0 +1,23 @@
+INSTRUCCIONES:
+
+
+COMPILAR:
+  Abrir una terminal en esta carpeta
+  Ejecutar: make
+  Con esto ya se compila todo
+EJECUTAR CLIENT:
+  En una terminal, ejecutar: ./client 255.255.255.255:8080/home/desktop/imagen.png
+  Siendo 255.255.255.255 la IP del servidor al cual queremos conectarnos y 8080 el puerto
+  "/home/desktop/imagen.png" es la direccion en la maquina que corre el servidor del archivo que queremos descargar
+  
+EJECUTAR SERVER:
+  En una terminal, ejecutar: ./server 255.255.255.255 7002
+  Siendo 255.255.255.255 la IP de la máquina donde se está corriendo este server y 7002 el puerto por el cuál funcionará
+
+EJECUTAR BALANCEADOR:
+  En una terminal, ejecutar: ./balanceador 255.255.255.255 7002
+  Siendo 255.255.255.255 la IP de la máquina donde se está corriendo este balanceador y 7002 el puerto por el cuál funcionará
+  
+  
+NOTA:
+  PARA INFORMACION MAS DETALLADA DE COMO REALIZAR LAS PRUEBAS Y DE COMO CORRER LOS PROGRAMAS, CONSULTAR LA DOCUMENTACION, EN LA SECCION DE CASOS DE PRUEBA
