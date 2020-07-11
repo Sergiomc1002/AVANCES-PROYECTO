@@ -83,7 +83,7 @@ int main( int argc, char * argv[] ) {
 					f_exit = true; 
 				}				
 			}
-			printf("read status : %d \n", read_status); 
+			//printf("read status : %d \n", read_status); 
 		}
 		
 		if (status_http_protocol == 200) {
