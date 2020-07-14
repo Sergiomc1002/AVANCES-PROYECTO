@@ -395,8 +395,8 @@ int main(int argc, char* argv[])
 	#ifdef LOCAL
 		char * msg = (char *)"B/C/127.0.0.1/7002";
     #endif
-    
-    int n = ssocket.SendTo((char *)"172.16.123.31", &s_in, B_PORT + TEST, msg, strlen(msg));
+    int n = ssocket.SendTo((char *)"172.16.123.111", &s_in, B_PORT + TEST, msg, strlen(msg));
+    //int n = ssocket.SendTo((char *)"172.16.123.31", &s_in, B_PORT + TEST, msg, strlen(msg));
 
     if (n != -1)
         printf("Broadcast enviado.\n");

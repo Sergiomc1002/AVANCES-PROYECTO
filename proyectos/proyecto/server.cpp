@@ -58,8 +58,8 @@ void* listen_balancers(void* data) {
 	#ifdef LOCAL
 		char * msgp = (char *)"S/C/127.0.0.1/7000";	//cuando me hable por stream, hableme por el 7000. 
 	#endif
-	
-	int n = s_socket->SendTo((char *)"172.16.123.31", &s_in, B_PORT, msgp, strlen(msgp));
+	int n = s_socket->SendTo((char *)"172.16.123.111", &s_in, B_PORT, msgp, strlen(msgp));
+	//int n = s_socket->SendTo((char *)"172.16.123.31", &s_in, B_PORT, msgp, strlen(msgp));
 	printf("Me acabo de levantar, broadcast enviado.\n");
 
 	//r_socket->Bind(B_PORT + 1, 0);
